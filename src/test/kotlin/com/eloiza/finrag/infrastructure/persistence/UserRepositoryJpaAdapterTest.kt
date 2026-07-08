@@ -1,5 +1,6 @@
 package com.eloiza.finrag.infrastructure.persistence
 
+import com.eloiza.finrag.domain.exception.EmailAlreadyRegisteredException
 import com.eloiza.finrag.domain.model.User
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
@@ -33,10 +34,10 @@ class UserRepositoryJpaAdapterTest(jpaUserRepository: JpaUserRepository) : FunSp
         adapter.findByEmail("inexistente@email.com").shouldBeNull()
     }
 
-    test("rejeita email duplicado por causa da constraint UNIQUE") {
+    test("traduz violação da constraint UNIQUE em EmailAlreadyRegisteredException") {
         adapter.save(aUser(email = "duplicado@email.com"))
 
-        shouldThrow<Exception> {
+        shouldThrow<EmailAlreadyRegisteredException> {
             adapter.save(aUser(email = "duplicado@email.com"))
         }
     }
