@@ -38,7 +38,7 @@
 
 - [x] Adicionar dependência `spring-boot-starter-security`
 - [x] Adicionar dependências `jjwt-api`/`jjwt-impl`/`jjwt-jackson`
-- [ ] Adicionar dependência `spring-boot-starter-validation`
+- [x] Adicionar dependência `spring-boot-starter-validation`
 - [x] Implementar `infrastructure/security/BCryptPasswordHasher.kt` (+ teste
       unitário: hash difere da senha crua, matches true/false, salt aleatório)
 - [x] Implementar `infrastructure/security/JjwtTokenProvider.kt` (gerar token
@@ -64,35 +64,44 @@
 
 ## API
 
-- [ ] Criar DTOs: `RegisterRequest`/`RegisterResponse`,
+- [x] Criar DTOs: `RegisterRequest`/`RegisterResponse`,
       `LoginRequest`/`LoginResponse`, com Bean Validation
-- [ ] Implementar `api/AuthController.kt` (`POST /auth/register`,
+- [x] Implementar `api/AuthController.kt` (`POST /auth/register`,
       `POST /auth/login`)
-- [ ] Implementar `api/SecurityExceptionHandler.kt` (`@ControllerAdvice` →
-      `ProblemDetail` para 400/401/409)
+- [x] Implementar `api/SecurityExceptionHandler.kt` (`@RestControllerAdvice` →
+      `ProblemDetail` para 401/409; `400` de validação sai de graça via
+      `spring.mvc.problemdetails.enabled=true`)
+- [x] Criar `infrastructure/UseCaseConfig.kt` (composition root: os use cases
+      não têm anotação Spring de propósito, então precisam de `@Bean`
+      explícito em algum lugar da camada de infra)
 
 ## Testes de integração (Kotest + Testcontainers)
 
-- [ ] Registro com sucesso → `201` + corpo sem senha
-- [ ] Registro com email duplicado → `409`
-- [ ] Registro com payload inválido (email malformado, senha curta) → `400`
-- [ ] Login com sucesso → `200` + `accessToken` presente
-- [ ] Login com senha errada → `401`, mensagem genérica
-- [ ] Login com email inexistente → `401`, mesma mensagem genérica do caso
+- [x] Registro com sucesso → `201` + corpo sem senha
+- [x] Registro com email duplicado → `409`
+- [x] Registro com payload inválido (email malformado, senha curta) → `400`
+- [x] Login com sucesso → `200` + `accessToken` presente
+- [x] Login com senha errada → `401`, mensagem genérica
+- [x] Login com email inexistente → `401`, mesma mensagem genérica do caso
       anterior
-- [ ] Acesso a rota protegida sem header `Authorization` → `401`
-- [ ] Acesso a rota protegida com token válido → passa pelo filtro (usar rota
-      dummy/teste se M2 ainda não existir)
-- [ ] Acesso a rota protegida com token expirado/malformado → `401`
-- [ ] `GET /actuator/health` continua público (sem token) → `200`
+- [x] Acesso a rota protegida sem header `Authorization` → `401` (coberto em
+      `SecurityConfigTest`)
+- [x] Acesso a rota protegida com token válido → passa pelo filtro (coberto em
+      `SecurityConfigTest`, usando rota dummy já que M2 ainda não existe)
+- [x] Acesso a rota protegida com token expirado/malformado → `401` (coberto
+      em `SecurityConfigTest`/`JjwtTokenProviderTest`)
+- [x] `GET /actuator/health` continua público (sem token) → `200`
 
 ## Fechamento do marco
 
-- [ ] Rodar `./gradlew build` limpo (build + todos os testes)
-- [ ] Atualizar README se necessário (novos endpoints, nova env var
-      `JWT_SECRET`)
-- [ ] Commit(s) semânticos ao longo da implementação (ex.:
-      `feat(auth): adicionar registro e login com JWT`)
+- [x] Rodar `./gradlew build` limpo (build + todos os testes) — 31 testes
+      passando
+- [x] Atualizar README (endpoints `/auth/register`/`/auth/login` com exemplos
+      de `curl`, env var `JWT_SECRET` obrigatória ao rodar sem Docker Compose)
+- [x] Validar fluxo completo via `docker compose up` de verdade (não só
+      testes): registro, duplicado, payload inválido, login, senha errada,
+      rota protegida com/sem token — todos com o status e corpo esperados
+- [x] Commit(s) semânticos ao longo da implementação
 - [ ] Abrir PR de `feature/m1-auth-jwt` para `develop`
 
 ## Definição de pronto (Definition of Done)
