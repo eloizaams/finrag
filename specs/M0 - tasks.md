@@ -10,9 +10,9 @@
 - [x] Validar `docker-compose up` sobe tudo e `/actuator/health` responde `UP`
 - [x] Escrever primeiro teste com Testcontainers validando conexão + extensão vector habilitada
 - [x] Criar `.github/workflows/ci.yml` com build + testes
-- [ ] Validar CI verde em um PR de teste
+- [x] Validar CI verde em um PR de teste (PR #1, run verde em 2m25s)
 - [x] Escrever README raiz (stack, como rodar, link para `specs/`)
-- [ ] Commit semântico final do marco (`chore: setup inicial do projeto (M0)`)
+- [x] Commit semântico final do marco (`chore: setup inicial do projeto (M0)`)
 
 ## Definição de pronto (Definition of Done)
 
