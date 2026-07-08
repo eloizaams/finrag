@@ -6,14 +6,13 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 
 @SpringBootTest
 class FinragApplicationTests {
+    @Test
+    fun contextLoads() {
+    }
 
-	@Test
-	fun contextLoads() {
-	}
-
-	companion object {
-		@ServiceConnection
-		@JvmStatic
-		val postgres = PostgresTestContainer.instance
-	}
+    companion object {
+        @ServiceConnection
+        @JvmStatic
+        val postgres = PostgresTestContainer.instance
+    }
 }

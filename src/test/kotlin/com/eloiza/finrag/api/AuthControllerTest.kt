@@ -1,5 +1,6 @@
 package com.eloiza.finrag.api
 
+import com.eloiza.finrag.PostgresTestContainer
 import com.eloiza.finrag.api.dto.LoginRequest
 import com.eloiza.finrag.api.dto.LoginResponse
 import com.eloiza.finrag.api.dto.RegisterRequest
@@ -12,7 +13,6 @@ import io.kotest.matchers.string.shouldContain
 import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
-import com.eloiza.finrag.PostgresTestContainer
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.http.HttpStatus
 import java.util.UUID

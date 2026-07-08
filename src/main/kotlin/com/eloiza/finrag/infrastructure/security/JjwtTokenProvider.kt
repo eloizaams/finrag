@@ -24,7 +24,8 @@ class JjwtTokenProvider(
         val expiration = Date(now.time + expirationMinutes * 60_000)
 
         val token =
-            Jwts.builder()
+            Jwts
+                .builder()
                 .subject(user.id.toString())
                 .claim("email", user.email)
                 .issuedAt(now)
@@ -38,7 +39,8 @@ class JjwtTokenProvider(
     override fun validate(token: String): TokenClaims? =
         try {
             val claims =
-                Jwts.parser()
+                Jwts
+                    .parser()
                     .verifyWith(signingKey)
                     .build()
                     .parseSignedClaims(token)

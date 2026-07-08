@@ -42,7 +42,8 @@ class SecurityConfigTest(
 
         test("rota protegida com token malformado retorna 401") {
             val request =
-                RequestEntity.get(protectedPath)
+                RequestEntity
+                    .get(protectedPath)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer token-invalido")
                     .build()
 
@@ -62,7 +63,8 @@ class SecurityConfigTest(
             val token = tokenProvider.generate(user).token
 
             val request =
-                RequestEntity.get(protectedPath)
+                RequestEntity
+                    .get(protectedPath)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer $token")
                     .build()
 

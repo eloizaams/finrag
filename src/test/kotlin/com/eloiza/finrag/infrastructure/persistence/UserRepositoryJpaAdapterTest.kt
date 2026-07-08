@@ -17,30 +17,32 @@ import java.util.UUID
 
 @ApplyExtension(SpringExtension::class)
 @SpringBootTest
-class UserRepositoryJpaAdapterTest(jpaUserRepository: JpaUserRepository) : FunSpec({
+class UserRepositoryJpaAdapterTest(
+    jpaUserRepository: JpaUserRepository,
+) : FunSpec({
 
-    val adapter = UserRepositoryJpaAdapter(jpaUserRepository)
+        val adapter = UserRepositoryJpaAdapter(jpaUserRepository)
 
-    test("salva um usuário e encontra pelo email") {
-        val user = aUser(email = "ana@email.com")
+        test("salva um usuário e encontra pelo email") {
+            val user = aUser(email = "ana@email.com")
 
-        adapter.save(user)
+            adapter.save(user)
 
-        adapter.findByEmail("ana@email.com") shouldBe user
-    }
-
-    test("retorna null quando o email não existe") {
-        adapter.findByEmail("inexistente@email.com").shouldBeNull()
-    }
-
-    test("traduz violação da constraint UNIQUE em EmailAlreadyRegisteredException") {
-        adapter.save(aUser(email = "duplicado@email.com"))
-
-        shouldThrow<EmailAlreadyRegisteredException> {
-            adapter.save(aUser(email = "duplicado@email.com"))
+            adapter.findByEmail("ana@email.com") shouldBe user
         }
-    }
-}) {
+
+        test("retorna null quando o email não existe") {
+            adapter.findByEmail("inexistente@email.com").shouldBeNull()
+        }
+
+        test("traduz violação da constraint UNIQUE em EmailAlreadyRegisteredException") {
+            adapter.save(aUser(email = "duplicado@email.com"))
+
+            shouldThrow<EmailAlreadyRegisteredException> {
+                adapter.save(aUser(email = "duplicado@email.com"))
+            }
+        }
+    }) {
     companion object {
         @ServiceConnection
         @JvmStatic
