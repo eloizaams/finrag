@@ -11,9 +11,9 @@
 
 ## Casos de uso
 
-- [ ] Implementar `application/RegisterUserUseCase.kt` (+ teste unitário com
+- [x] Implementar `application/RegisterUserUseCase.kt` (+ teste unitário com
       fake de `UserRepository`/`PasswordHasher`)
-- [ ] Implementar `application/AuthenticateUserUseCase.kt` (+ teste unitário
+- [x] Implementar `application/AuthenticateUserUseCase.kt` (+ teste unitário
       com fake de `UserRepository`/`PasswordHasher`/`TokenProvider`)
 
 ## Infraestrutura — persistência
