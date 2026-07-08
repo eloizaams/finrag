@@ -51,9 +51,16 @@
 - [x] Validar na inicialização que `JWT_SECRET` tem tamanho mínimo (falhar
       rápido se não tiver) — de graça via `Keys.hmacShaKeyFor` do jjwt, que
       lança `WeakKeyException` na construção da chave se for curta demais
-- [ ] Implementar `infrastructure/security/JwtAuthenticationFilter.kt`
-- [ ] Implementar `infrastructure/security/SecurityConfig.kt` (stateless, CSRF
-      off, `/auth/**` e `/actuator/health` públicos, resto autenticado)
+- [x] Implementar `infrastructure/security/JwtAuthenticationFilter.kt`
+- [x] Implementar `infrastructure/security/SecurityConfig.kt` (stateless, CSRF
+      off, `/auth/**`, `/actuator/health` e `/error` públicos, resto
+      autenticado; `AuthenticationEntryPoint` explícito para responder `401`
+      em vez do `403` padrão do Spring Security quando não há
+      `httpBasic`/`formLogin` configurado)
+- [x] Teste de integração (Testcontainers) cobrindo o filtro + regras de
+      autorização: `/actuator/health` sem token, rota protegida sem token
+      (`401`), com token malformado (`401`), com token válido (autentica e
+      chega a dar `404` de rota inexistente, não `401`)
 
 ## API
 
