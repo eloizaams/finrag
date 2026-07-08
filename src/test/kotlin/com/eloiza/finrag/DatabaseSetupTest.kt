@@ -10,8 +10,6 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.http.HttpStatus
-import org.testcontainers.postgresql.PostgreSQLContainer
-import org.testcontainers.utility.DockerImageName
 import javax.sql.DataSource
 
 @ApplyExtension(SpringExtension::class)
@@ -41,6 +39,6 @@ class DatabaseSetupTest(
     companion object {
         @ServiceConnection
         @JvmStatic
-        val postgres: PostgreSQLContainer = PostgreSQLContainer(DockerImageName.parse("pgvector/pgvector:pg16")).apply { start() }
+        val postgres = PostgresTestContainer.instance
     }
 }

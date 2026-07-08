@@ -1,5 +1,6 @@
 package com.eloiza.finrag.infrastructure.persistence
 
+import com.eloiza.finrag.PostgresTestContainer
 import com.eloiza.finrag.domain.exception.EmailAlreadyRegisteredException
 import com.eloiza.finrag.domain.model.User
 import io.kotest.assertions.throwables.shouldThrow
@@ -10,8 +11,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
-import org.testcontainers.postgresql.PostgreSQLContainer
-import org.testcontainers.utility.DockerImageName
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -45,8 +44,7 @@ class UserRepositoryJpaAdapterTest(jpaUserRepository: JpaUserRepository) : FunSp
     companion object {
         @ServiceConnection
         @JvmStatic
-        val postgres: PostgreSQLContainer =
-            PostgreSQLContainer(DockerImageName.parse("pgvector/pgvector:pg16")).apply { start() }
+        val postgres = PostgresTestContainer.instance
     }
 }
 

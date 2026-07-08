@@ -1,5 +1,6 @@
 package com.eloiza.finrag.infrastructure.security
 
+import com.eloiza.finrag.PostgresTestContainer
 import com.eloiza.finrag.domain.model.User
 import com.eloiza.finrag.domain.port.TokenProvider
 import io.kotest.core.extensions.ApplyExtension
@@ -13,8 +14,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
-import org.testcontainers.postgresql.PostgreSQLContainer
-import org.testcontainers.utility.DockerImageName
 import java.net.URI
 import java.time.Instant
 import java.util.UUID
@@ -75,6 +74,6 @@ class SecurityConfigTest(
     companion object {
         @ServiceConnection
         @JvmStatic
-        val postgres: PostgreSQLContainer = PostgreSQLContainer(DockerImageName.parse("pgvector/pgvector:pg16")).apply { start() }
+        val postgres = PostgresTestContainer.instance
     }
 }
