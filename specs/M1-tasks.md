@@ -102,7 +102,8 @@
       testes): registro, duplicado, payload inválido, login, senha errada,
       rota protegida com/sem token — todos com o status e corpo esperados
 - [x] Commit(s) semânticos ao longo da implementação
-- [ ] Abrir PR de `feature/m1-auth-jwt` para `develop`
+- [x] Abrir PR de `feature/m1-auth-jwt` para `develop` (PR #2, CI verde em
+      2m55s)
 
 ## Definição de pronto (Definition of Done)
 
