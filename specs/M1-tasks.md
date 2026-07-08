@@ -18,16 +18,26 @@
 
 ## Infraestrutura — persistência
 
-- [ ] Adicionar dependências: `spring-boot-starter-security`,
-      `spring-boot-starter-validation`, `jjwt-api`/`jjwt-impl`/`jjwt-jackson`
-- [ ] Criar migration `V2__create_users_table.sql`
-- [ ] Criar `infrastructure/persistence/UserEntity.kt` (JPA)
-- [ ] Criar `infrastructure/persistence/UserRepositoryJpaAdapter.kt`
-- [ ] Teste de integração (Testcontainers) do adapter: salvar e buscar por
-      email, violação de unique constraint em email duplicado
+> Backfill do M0 aplicado junto: o `build.gradle.kts` não tinha JPA/Flyway/
+> Postgres driver/Testcontainers ainda (M0 nunca chegou a ser implementado).
+> `docker-compose.yml`/`Dockerfile`/CI continuam pendências do M0.
+
+- [x] Adicionar dependências: `spring-boot-starter-data-jpa`,
+      `spring-boot-starter-flyway`, `flyway-database-postgresql`, driver
+      `postgresql`, `spring-boot-testcontainers` +
+      `testcontainers-junit-jupiter`/`testcontainers-postgresql`
+- [x] Criar migration `V1__enable_pgvector.sql` (M0) e
+      `V2__create_users_table.sql` (M1)
+- [x] Criar `infrastructure/persistence/UserEntity.kt` (JPA)
+- [x] Criar `infrastructure/persistence/UserRepositoryJpaAdapter.kt`
+- [x] Teste de integração (Testcontainers, `pgvector/pgvector:pg16`) do
+      adapter: salvar e buscar por email, retorno nulo para email inexistente,
+      violação de unique constraint em email duplicado
 
 ## Infraestrutura — segurança
 
+- [ ] Adicionar dependências: `spring-boot-starter-security`,
+      `spring-boot-starter-validation`, `jjwt-api`/`jjwt-impl`/`jjwt-jackson`
 - [ ] Implementar `infrastructure/security/BCryptPasswordHasher.kt`
 - [ ] Implementar `infrastructure/security/JjwtTokenProvider.kt` (gerar token
       com claims `sub`/`email`/`iat`/`exp`; validar assinatura + expiração)
