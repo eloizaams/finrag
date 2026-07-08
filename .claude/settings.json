@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git mv *)",
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(git rebase *)",
+      "Bash(git ls-remote *)",
+      "Bash(git push *)",
+      "Bash(gh pr *)",
+      "Bash(gh run *)",
+      "Bash(./gradlew build *)",
+      "Bash(./gradlew test *)",
+      "Bash(./gradlew compileKotlin *)",
+      "Bash(./gradlew compileTestKotlin *)",
+      "Bash(./gradlew dependencies *)",
+      "Bash(./gradlew ktlintCheck *)",
+      "Bash(./gradlew ktlintFormat *)",
+      "Bash(docker compose *)",
+      "Bash(docker info *)",
+      "mcp__claude_ai_Context7__query-docs",
+      "mcp__claude_ai_Context7__resolve-library-id"
+    ]
+  }
+}

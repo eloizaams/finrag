@@ -25,10 +25,11 @@ class SecurityConfig(
                 }
             }.authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers("/auth/**", "/actuator/health", "/error").permitAll()
-                    .anyRequest().authenticated()
-            }
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+                    .requestMatchers("/auth/**", "/actuator/health", "/error")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
     }

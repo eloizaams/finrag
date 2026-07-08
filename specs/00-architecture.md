@@ -60,7 +60,7 @@ flowchart TB
 
 ```
 finrag/
-├── src/main/kotlin/com/seudominio/finrag/
+├── src/main/kotlin/com/eloiza/finrag/
 │   ├── domain/
 │   │   ├── model/           # Document, Chunk, Answer
 │   │   └── port/            # EmbeddingProvider, LlmClient, ChunkRepository (interfaces)

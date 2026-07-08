@@ -1,6 +1,8 @@
 package com.eloiza.finrag.infrastructure.security
 
 import com.eloiza.finrag.domain.model.User
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -9,54 +11,68 @@ import java.util.UUID
 
 private const val TEST_SECRET = "test-secret-at-least-32-bytes-long-1234567890"
 
-class JjwtTokenProviderTest : FunSpec({
+class JjwtTokenProviderTest :
+    FunSpec({
 
-    val user =
-        User(
-            id = UUID.randomUUID(),
-            email = "ana@email.com",
-            passwordHash = "hashed:senha123",
-            createdAt = Instant.now(),
-        )
+        val user =
+            User(
+                id = UUID.randomUUID(),
+                email = "ana@email.com",
+                passwordHash = "hashed:senha123",
+                createdAt = Instant.now(),
+            )
 
-    test("gera um token e consegue validá-lo, extraindo as claims corretas") {
-        val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
+        test("gera um token e consegue validá-lo, extraindo as claims corretas") {
+            val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
 
-        val result = provider.generate(user)
-        val claims = provider.validate(result.token)
+            val result = provider.generate(user)
+            val claims = provider.validate(result.token)
 
-        claims?.userId shouldBe user.id
-        claims?.email shouldBe user.email
-    }
+            claims?.userId shouldBe user.id
+            claims?.email shouldBe user.email
+        }
 
-    test("expiresInSeconds reflete o expiration-minutes configurado") {
-        val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
+        test("expiresInSeconds reflete o expiration-minutes configurado") {
+            val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
 
-        val result = provider.generate(user)
+            val result = provider.generate(user)
 
-        result.expiresInSeconds shouldBe 3600L
-    }
+            result.expiresInSeconds shouldBe 3600L
+        }
 
-    test("rejeita token expirado") {
-        val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = -1)
+        test("rejeita token expirado") {
+            val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = -1)
 
-        val result = provider.generate(user)
+            val result = provider.generate(user)
 
-        provider.validate(result.token).shouldBeNull()
-    }
+            provider.validate(result.token).shouldBeNull()
+        }
 
-    test("rejeita token assinado com uma chave diferente") {
-        val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
-        val otherProvider = JjwtTokenProvider("outra-chave-completamente-diferente-32bytes-xyz", expirationMinutes = 60)
+        test("rejeita token assinado com uma chave diferente") {
+            val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
+            val otherProvider = JjwtTokenProvider("outra-chave-completamente-diferente-32bytes-xyz", expirationMinutes = 60)
 
-        val result = provider.generate(user)
+            val result = provider.generate(user)
 
-        otherProvider.validate(result.token).shouldBeNull()
-    }
+            otherProvider.validate(result.token).shouldBeNull()
+        }
 
-    test("rejeita token malformado") {
-        val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
+        test("rejeita token malformado") {
+            val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
 
-        provider.validate("token-invalido").shouldBeNull()
-    }
-})
+            provider.validate("token-invalido").shouldBeNull()
+        }
+
+        test("rejeita token com assinatura válida mas sem o claim email") {
+            val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
+            val signingKey = Keys.hmacShaKeyFor(TEST_SECRET.toByteArray())
+            val tokenSemEmail =
+                Jwts
+                    .builder()
+                    .subject(user.id.toString())
+                    .signWith(signingKey)
+                    .compact()
+
+            provider.validate(tokenSemEmail).shouldBeNull()
+        }
+    })

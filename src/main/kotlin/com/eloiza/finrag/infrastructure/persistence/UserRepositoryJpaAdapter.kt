@@ -1,7 +1,9 @@
 package com.eloiza.finrag.infrastructure.persistence
 
+import com.eloiza.finrag.domain.exception.EmailAlreadyRegisteredException
 import com.eloiza.finrag.domain.model.User
 import com.eloiza.finrag.domain.port.UserRepository
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Component
 
 @Component
@@ -9,7 +11,11 @@ class UserRepositoryJpaAdapter(
     private val jpaUserRepository: JpaUserRepository,
 ) : UserRepository {
     override fun save(user: User): User {
-        jpaUserRepository.save(user.toEntity())
+        try {
+            jpaUserRepository.save(user.toEntity())
+        } catch (e: DataIntegrityViolationException) {
+            throw EmailAlreadyRegisteredException(user.email)
+        }
         return user
     }
 
