@@ -1,10 +1,18 @@
 FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
-COPY . .
-RUN chmod +x gradlew && ./gradlew bootJar --no-daemon -x test
+
+COPY gradlew ./
+COPY gradle gradle
+COPY build.gradle.kts settings.gradle.kts ./
+RUN chmod +x gradlew && ./gradlew dependencies --no-daemon -q
+
+COPY src src
+RUN ./gradlew bootJar --no-daemon -x test
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+RUN addgroup -S finrag && adduser -S finrag -G finrag
+COPY --from=build --chown=finrag:finrag /app/build/libs/*.jar app.jar
+USER finrag
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
