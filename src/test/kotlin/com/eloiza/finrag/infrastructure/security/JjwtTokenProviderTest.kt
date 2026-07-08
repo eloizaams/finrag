@@ -1,6 +1,8 @@
 package com.eloiza.finrag.infrastructure.security
 
 import com.eloiza.finrag.domain.model.User
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -58,5 +60,17 @@ class JjwtTokenProviderTest : FunSpec({
         val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
 
         provider.validate("token-invalido").shouldBeNull()
+    }
+
+    test("rejeita token com assinatura válida mas sem o claim email") {
+        val provider = JjwtTokenProvider(TEST_SECRET, expirationMinutes = 60)
+        val signingKey = Keys.hmacShaKeyFor(TEST_SECRET.toByteArray())
+        val tokenSemEmail =
+            Jwts.builder()
+                .subject(user.id.toString())
+                .signWith(signingKey)
+                .compact()
+
+        provider.validate(tokenSemEmail).shouldBeNull()
     }
 })

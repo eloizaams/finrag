@@ -44,9 +44,11 @@ class JjwtTokenProvider(
                     .parseSignedClaims(token)
                     .payload
 
+            val email = claims["email"] as? String ?: return null
+
             TokenClaims(
                 userId = UUID.fromString(claims.subject),
-                email = claims["email"] as String,
+                email = email,
             )
         } catch (e: JwtException) {
             null
