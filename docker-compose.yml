@@ -26,6 +26,7 @@ services:
       DB_NAME: finrag
       DB_USER: finrag
       DB_PASSWORD: finrag
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-me-1234567890abcdef}
     ports:
       - "8080:8080"
 

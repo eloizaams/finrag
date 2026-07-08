@@ -36,17 +36,21 @@
 
 ## Infraestrutura — segurança
 
-- [ ] Adicionar dependências: `spring-boot-starter-security`,
-      `spring-boot-starter-validation`, `jjwt-api`/`jjwt-impl`/`jjwt-jackson`
-- [ ] Implementar `infrastructure/security/BCryptPasswordHasher.kt`
-- [ ] Implementar `infrastructure/security/JjwtTokenProvider.kt` (gerar token
+- [x] Adicionar dependência `spring-boot-starter-security`
+- [x] Adicionar dependências `jjwt-api`/`jjwt-impl`/`jjwt-jackson`
+- [ ] Adicionar dependência `spring-boot-starter-validation`
+- [x] Implementar `infrastructure/security/BCryptPasswordHasher.kt` (+ teste
+      unitário: hash difere da senha crua, matches true/false, salt aleatório)
+- [x] Implementar `infrastructure/security/JjwtTokenProvider.kt` (gerar token
       com claims `sub`/`email`/`iat`/`exp`; validar assinatura + expiração)
-- [ ] Teste unitário do `JjwtTokenProvider`: gera e valida token válido, rejeita
-      token expirado, rejeita token com assinatura errada
-- [ ] Configurar `finrag.jwt.secret` e `finrag.jwt.expiration-minutes` no
+- [x] Teste unitário do `JjwtTokenProvider`: gera e valida token válido, rejeita
+      token expirado, rejeita token com assinatura errada, rejeita token
+      assinado com chave diferente, rejeita token malformado
+- [x] Configurar `finrag.jwt.secret` e `finrag.jwt.expiration-minutes` no
       `application.yaml`, lendo de variável de ambiente
-- [ ] Validar na inicialização que `JWT_SECRET` tem tamanho mínimo (falhar
-      rápido se não tiver)
+- [x] Validar na inicialização que `JWT_SECRET` tem tamanho mínimo (falhar
+      rápido se não tiver) — de graça via `Keys.hmacShaKeyFor` do jjwt, que
+      lança `WeakKeyException` na construção da chave se for curta demais
 - [ ] Implementar `infrastructure/security/JwtAuthenticationFilter.kt`
 - [ ] Implementar `infrastructure/security/SecurityConfig.kt` (stateless, CSRF
       off, `/auth/**` e `/actuator/health` públicos, resto autenticado)
