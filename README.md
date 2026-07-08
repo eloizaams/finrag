@@ -45,8 +45,34 @@ docker run -d --name finrag-db -p 5432:5432 \
   pgvector/pgvector:pg16
 ```
 
-E rode a aplicação com `./gradlew bootRun` (usa os valores padrão de
-`application.yaml`, que já apontam para `localhost:5432`).
+Defina o segredo do JWT (obrigatório, sem valor padrão — precisa ter pelo
+menos 32 bytes para o HS256) e rode a aplicação:
+
+```bash
+export JWT_SECRET=um-segredo-de-desenvolvimento-com-pelo-menos-32-bytes
+./gradlew bootRun
+```
+
+(o resto da config usa os valores padrão de `application.yaml`, que já
+apontam para `localhost:5432`)
+
+## Autenticação
+
+```bash
+# registro
+curl -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"ana@email.com","password":"senha123"}'
+
+# login — retorna { accessToken, tokenType, expiresIn }
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"ana@email.com","password":"senha123"}'
+
+# rota autenticada: envie o token no header Authorization
+curl http://localhost:8080/algum-endpoint-protegido \
+  -H "Authorization: Bearer <accessToken>"
+```
 
 ## Comandos úteis
 
