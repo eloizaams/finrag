@@ -36,18 +36,20 @@
 
 ## Infraestrutura — persistência
 
-- [ ] Adicionar dependência `org.hibernate.orm:hibernate-vector`
-- [ ] Criar migration `V3__create_documents_and_chunks_tables.sql` (tabelas
+- [x] Adicionar dependência `org.hibernate.orm:hibernate-vector` (versão
+      resolvida pelo BOM do Spring Boot: `7.4.1.Final`, mesma do
+      `hibernate-core`)
+- [x] Criar migration `V3__create_documents_and_chunks_tables.sql` (tabelas
       `documents` e `chunks` conforme design; sem índice vetorial)
-- [ ] Criar `infrastructure/persistence/DocumentEntity.kt` e `ChunkEntity.kt`
+- [x] Criar `infrastructure/persistence/DocumentEntity.kt` e `ChunkEntity.kt`
       (embedding `float[]` com `@JdbcTypeCode(SqlTypes.VECTOR)` +
       `@Array(length = 1536)`)
-- [ ] Implementar `infrastructure/persistence/DocumentRepositoryJpaAdapter.kt`
+- [x] Implementar `infrastructure/persistence/DocumentRepositoryJpaAdapter.kt`
       com `save` transacional (documento + chunks: tudo ou nada)
-- [ ] Teste de integração (Testcontainers) do adapter: salvar documento com
+- [x] Teste de integração (Testcontainers) do adapter: salvar documento com
       chunks e ler de volta (embedding com 1536 dimensões preservado),
       `findAllByUserId` filtra por usuário, falha no meio do save não deixa
-      linhas órfãs
+      linhas órfãs (rollback transacional)
 
 ## Infraestrutura — OpenAI
 

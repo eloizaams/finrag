@@ -31,6 +31,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.apache.pdfbox:pdfbox:3.0.7")
+    implementation("org.hibernate.orm:hibernate-vector")
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
