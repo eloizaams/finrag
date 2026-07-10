@@ -20,11 +20,13 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 
 Requisitos: Docker e Docker Compose.
 
-A ingestão de documentos (`POST /documents`) chama a API de embeddings da OpenAI,
-então defina uma chave válida antes de subir o ambiente:
+A ingestão de documentos (`POST /documents`) chama a API de embeddings da OpenAI
+e as perguntas (`POST /questions`) chamam a API da Anthropic para gerar a
+resposta, então defina as duas chaves antes de subir o ambiente:
 
 ```bash
 export OPENAI_API_KEY=sk-...
+export ANTHROPIC_API_KEY=sk-ant-...
 docker compose up
 ```
 
@@ -50,12 +52,13 @@ docker run -d --name finrag-db -p 5432:5432 \
 ```
 
 Defina o segredo do JWT (obrigatório, sem valor padrão — precisa ter pelo
-menos 32 bytes para o HS256) e a chave da OpenAI (obrigatória, também sem
-valor padrão) e rode a aplicação:
+menos 32 bytes para o HS256) e as chaves da OpenAI e da Anthropic
+(obrigatórias, também sem valor padrão) e rode a aplicação:
 
 ```bash
 export JWT_SECRET=um-segredo-de-desenvolvimento-com-pelo-menos-32-bytes
 export OPENAI_API_KEY=sk-...
+export ANTHROPIC_API_KEY=sk-ant-...
 ./gradlew bootRun
 ```
 
@@ -105,6 +108,33 @@ Erros mapeados para `ProblemDetail`:
 | Falha ao gerar embeddings (OpenAI)            | `502`  |
 | Arquivo maior que o limite configurado        | `413`  |
 | Sem token / token inválido                    | `401`  |
+
+## Perguntas
+
+Q&A sobre os documentos já indexados (RAG): a pergunta vira embedding, os
+chunks mais similares por cosseno são buscados no pgvector — só entre os
+documentos do usuário autenticado —, e a resposta é gerada pela Anthropic
+(Claude Haiku) com base apenas nesse contexto, citando as fontes usadas.
+
+```bash
+curl -X POST http://localhost:8080/questions \
+  -H "Authorization: Bearer <accessToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Qual foi a receita no terceiro trimestre?"}'
+```
+
+Retorna `200` com `{ answer, sources: [{ documentId, filename, excerpt, similarity }] }`.
+Sem nenhum documento indexado (ou nenhum resultado na busca), `answer` traz
+uma mensagem padrão avisando disso e `sources` vem vazio — não é erro.
+
+Erros mapeados para `ProblemDetail`:
+
+| Situação                                      | Status |
+|------------------------------------------------|--------|
+| Pergunta vazia ou ausente                       | `400`  |
+| Falha ao gerar embedding da pergunta (OpenAI)   | `502`  |
+| Falha ao gerar resposta (Anthropic)             | `502`  |
+| Sem token / token inválido                      | `401`  |
 
 ## Comandos úteis
 
