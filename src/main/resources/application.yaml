@@ -17,3 +17,10 @@ finrag:
   jwt:
     secret: ${JWT_SECRET}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+  openai:
+    api-key: ${OPENAI_API_KEY}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+    embedding-model: text-embedding-3-small
+  chunking:
+    max-chars: 1000
+    overlap-chars: 200

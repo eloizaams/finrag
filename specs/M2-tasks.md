@@ -53,18 +53,24 @@
 
 ## Infraestrutura — OpenAI
 
-- [ ] Promover `spring-boot-restclient` de `testImplementation` para
-      `implementation`
-- [ ] Criar `infrastructure/openai/OpenAiProperties.kt`
-      (`@ConfigurationProperties`: `api-key`, `base-url`, `embedding-model`)
-- [ ] Configurar `finrag.openai.*` e `finrag.chunking.*` no `application.yaml`
-      (chave via `OPENAI_API_KEY`, sem default)
-- [ ] Implementar `infrastructure/openai/OpenAiEmbeddingProvider.kt`
+- [x] ~~Promover `spring-boot-restclient` de `testImplementation` para
+      `implementation`~~ — não foi necessário: `RestClient` já vem
+      transitivamente do `spring-boot-starter-web`, e `MockRestServiceServer`
+      já está disponível pelos `testImplementation` existentes
+- [x] Criar `infrastructure/openai/OpenAiProperties.kt`
+      (`@ConfigurationProperties`: `api-key`, `base-url`, `embedding-model`;
+      primeira vez usando essa anotação no projeto — registrada via
+      `@ConfigurationPropertiesScan` no `FinragApplication.kt`)
+- [x] Configurar `finrag.openai.*` e `finrag.chunking.*` no `application.yaml`
+      (chave via `OPENAI_API_KEY`, sem default; env var de teste adicionada
+      em `build.gradle.kts` para não quebrar os `@SpringBootTest` existentes)
+- [x] Implementar `infrastructure/openai/OpenAiEmbeddingProvider.kt`
       (`RestClient`, `POST /v1/embeddings` em lote, mapear falhas para
       `EmbeddingProviderException` sem logar a chave nem headers)
-- [ ] Teste do adapter com `MockRestServiceServer`: request correto (modelo,
+- [x] Teste do adapter com `MockRestServiceServer`: request correto (modelo,
       inputs em lote, header Authorization), parse da resposta na ordem dos
-      inputs, erro HTTP → `EmbeddingProviderException`
+      inputs (usando o campo `index` de forma defensiva), erro HTTP →
+      `EmbeddingProviderException`
 
 ## API
 
