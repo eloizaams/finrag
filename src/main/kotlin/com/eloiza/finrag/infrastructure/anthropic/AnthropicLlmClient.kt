@@ -1,6 +1,7 @@
 package com.eloiza.finrag.infrastructure.anthropic
 
 import com.eloiza.finrag.domain.exception.LlmProviderException
+import com.eloiza.finrag.domain.model.LlmResponse
 import com.eloiza.finrag.domain.port.LlmClient
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.slf4j.LoggerFactory
@@ -20,7 +21,7 @@ class AnthropicLlmClient(
     override fun generate(
         systemPrompt: String,
         userPrompt: String,
-    ): String {
+    ): LlmResponse {
         try {
             val response =
                 restClient
@@ -49,7 +50,11 @@ class AnthropicLlmClient(
                     properties.maxTokens,
                 )
             }
-            return text
+            return LlmResponse(
+                text = text,
+                promptTokens = response.usage?.inputTokens ?: 0,
+                completionTokens = response.usage?.outputTokens ?: 0,
+            )
         } catch (e: RestClientException) {
             throw LlmProviderException("Falha ao chamar a API de mensagens da Anthropic", e)
         }
@@ -78,9 +83,15 @@ private data class MessageParam(
 private data class MessageResponse(
     val content: List<ContentBlock>,
     @JsonProperty("stop_reason") val stopReason: String? = null,
+    val usage: Usage? = null,
 )
 
 private data class ContentBlock(
     val type: String,
     val text: String? = null,
+)
+
+private data class Usage(
+    @JsonProperty("input_tokens") val inputTokens: Int,
+    @JsonProperty("output_tokens") val outputTokens: Int,
 )

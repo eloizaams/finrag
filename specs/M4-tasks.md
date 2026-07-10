@@ -37,9 +37,9 @@
 
 ## Infraestrutura — Anthropic
 
-- [ ] Atualizar `infrastructure/anthropic/AnthropicLlmClient.kt`: parsear `usage.input_tokens`/
+- [x] Atualizar `infrastructure/anthropic/AnthropicLlmClient.kt`: parsear `usage.input_tokens`/
       `usage.output_tokens` da resposta de `/v1/messages`, retornar `LlmResponse`
-- [ ] Atualizar `AnthropicLlmClientTest` (via `MockRestServiceServer`) para cobrir o
+- [x] Atualizar `AnthropicLlmClientTest` (via `MockRestServiceServer`) para cobrir o
       parsing de `usage` e o novo tipo de retorno
 
 ## API
