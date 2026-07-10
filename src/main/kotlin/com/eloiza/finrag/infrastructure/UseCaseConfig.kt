@@ -1,15 +1,19 @@
 package com.eloiza.finrag.infrastructure
 
+import com.eloiza.finrag.application.AskQuestionUseCase
 import com.eloiza.finrag.application.AuthenticateUserUseCase
 import com.eloiza.finrag.application.IngestDocumentUseCase
 import com.eloiza.finrag.application.ListDocumentsUseCase
 import com.eloiza.finrag.application.RegisterUserUseCase
+import com.eloiza.finrag.domain.port.ChunkSearchRepository
 import com.eloiza.finrag.domain.port.DocumentRepository
 import com.eloiza.finrag.domain.port.EmbeddingProvider
+import com.eloiza.finrag.domain.port.LlmClient
 import com.eloiza.finrag.domain.port.PasswordHasher
 import com.eloiza.finrag.domain.port.TextExtractor
 import com.eloiza.finrag.domain.port.TokenProvider
 import com.eloiza.finrag.domain.port.UserRepository
+import com.eloiza.finrag.domain.service.RagPromptBuilder
 import com.eloiza.finrag.domain.service.TextChunker
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -46,4 +50,16 @@ class UseCaseConfig {
 
     @Bean
     fun listDocumentsUseCase(documentRepository: DocumentRepository): ListDocumentsUseCase = ListDocumentsUseCase(documentRepository)
+
+    @Bean
+    fun ragPromptBuilder(): RagPromptBuilder = RagPromptBuilder()
+
+    @Bean
+    fun askQuestionUseCase(
+        embeddingProvider: EmbeddingProvider,
+        chunkSearchRepository: ChunkSearchRepository,
+        ragPromptBuilder: RagPromptBuilder,
+        llmClient: LlmClient,
+        @Value("\${finrag.rag.top-k}") topK: Int,
+    ): AskQuestionUseCase = AskQuestionUseCase(embeddingProvider, chunkSearchRepository, ragPromptBuilder, llmClient, topK)
 }

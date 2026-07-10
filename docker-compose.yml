@@ -28,6 +28,7 @@ services:
       DB_PASSWORD: finrag
       JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-me-1234567890abcdef}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     ports:
       - "8080:8080"
 
