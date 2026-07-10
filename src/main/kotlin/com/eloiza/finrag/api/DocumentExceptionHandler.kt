@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 
-@RestControllerAdvice
+@RestControllerAdvice(assignableTypes = [DocumentController::class])
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class DocumentExceptionHandler {
     private val log = LoggerFactory.getLogger(DocumentExceptionHandler::class.java)

@@ -1,6 +1,7 @@
 package com.eloiza.finrag.infrastructure.openai
 
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
+import com.eloiza.finrag.domain.model.Chunk
 import com.eloiza.finrag.domain.port.EmbeddingProvider
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -35,7 +36,16 @@ class OpenAiEmbeddingProvider(
                 )
             }
 
-            return response.data.sortedBy { it.index }.map { it.embedding }
+            val embeddings = response.data.sortedBy { it.index }.map { it.embedding }
+            embeddings.forEach { embedding ->
+                if (embedding.size != Chunk.EMBEDDING_DIMENSIONS) {
+                    throw EmbeddingProviderException(
+                        "OpenAI retornou embedding com ${embedding.size} dimensões, esperado ${Chunk.EMBEDDING_DIMENSIONS}",
+                    )
+                }
+            }
+
+            return embeddings
         } catch (e: RestClientException) {
             throw EmbeddingProviderException("Falha ao chamar a API de embeddings da OpenAI", e)
         }

@@ -30,12 +30,23 @@ class TextChunkerTest :
             chunks shouldBe listOf("abcdefghij", "klmno")
         }
 
-        test("chunk seguinte começa com o final (overlap) do chunk anterior") {
+        test("chunk seguinte começa com o final (overlap) do chunk anterior, separado por espaço") {
             val chunker = TextChunker(maxChars = 10, overlapChars = 3)
 
             val chunks = chunker.chunk("1234567890\n\nabcde")
 
-            chunks shouldBe listOf("1234567890", "890abcde")
+            chunks shouldBe listOf("1234567890", "890 abcde")
+        }
+
+        test("overlap não funde a última palavra de um chunk com a primeira do próximo") {
+            val chunker = TextChunker(maxChars = 70, overlapChars = 10)
+
+            val chunks =
+                chunker.chunk(
+                    "Paragrafo A com bastante conteudo para ocupar quase todo o limite.\n\nParagrafo B continua aqui.",
+                )
+
+            chunks[1] shouldBe " o limite. Paragrafo B continua aqui."
         }
 
         test("texto vazio ou só espaços/quebras de linha retorna lista vazia") {

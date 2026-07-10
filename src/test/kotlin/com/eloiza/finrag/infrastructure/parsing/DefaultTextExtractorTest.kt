@@ -1,15 +1,12 @@
 package com.eloiza.finrag.infrastructure.parsing
 
+import com.eloiza.finrag.domain.exception.EmptyDocumentException
 import com.eloiza.finrag.domain.model.DocumentType
+import com.eloiza.finrag.renderPdf
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.PDPage
-import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.font.PDType1Font
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName
-import java.io.ByteArrayOutputStream
 
 class DefaultTextExtractorTest :
     FunSpec({
@@ -30,22 +27,12 @@ class DefaultTextExtractorTest :
 
             text shouldBe markdown
         }
-    })
 
-private fun renderPdf(text: String): ByteArray {
-    PDDocument().use { document ->
-        val page = PDPage()
-        document.addPage(page)
-        PDPageContentStream(document, page).use { contentStream ->
-            contentStream.beginText()
-            contentStream.setFont(PDType1Font(FontName.HELVETICA), 12f)
-            contentStream.newLineAtOffset(50f, 700f)
-            contentStream.showText(text)
-            contentStream.endText()
+        test("PDF corrompido lança EmptyDocumentException em vez de propagar a IOException do PDFBox") {
+            val corruptBytes = "isso não é um PDF de verdade".toByteArray()
+
+            shouldThrow<EmptyDocumentException> {
+                extractor.extract(corruptBytes, DocumentType.PDF)
+            }
         }
-
-        val output = ByteArrayOutputStream()
-        document.save(output)
-        return output.toByteArray()
-    }
-}
+    })

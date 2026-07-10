@@ -62,7 +62,8 @@ class TextChunker(
             if (index == 0) {
                 chunkText
             } else {
-                baseChunks[index - 1].takeLast(overlapChars) + chunkText
+                val tail = baseChunks[index - 1].takeLast(overlapChars)
+                if (tail.isEmpty()) chunkText else "$tail $chunkText"
             }
         }
 

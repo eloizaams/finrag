@@ -1,6 +1,7 @@
 package com.eloiza.finrag.infrastructure.openai
 
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
+import com.eloiza.finrag.domain.model.Chunk
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -33,14 +34,16 @@ class OpenAiEmbeddingProviderTest :
             return OpenAiEmbeddingProvider(builder, properties) to server
         }
 
+        fun fakeEmbeddingJson(seed: Float) = (0 until Chunk.EMBEDDING_DIMENSIONS).joinToString(",", "[", "]") { seed.toString() }
+
         test("envia todos os textos em uma única requisição em lote e retorna os embeddings na ordem dos inputs") {
             val (provider, server) = buildProvider()
             val responseJson =
                 """
                 {
                   "data": [
-                    { "embedding": [0.3, 0.4], "index": 1 },
-                    { "embedding": [0.1, 0.2], "index": 0 }
+                    { "embedding": ${fakeEmbeddingJson(0.3f)}, "index": 1 },
+                    { "embedding": ${fakeEmbeddingJson(0.1f)}, "index": 0 }
                   ]
                 }
                 """.trimIndent()
@@ -57,8 +60,8 @@ class OpenAiEmbeddingProviderTest :
             val embeddings = provider.embed(listOf("texto 1", "texto 2"))
 
             embeddings shouldHaveSize 2
-            embeddings[0] shouldBe listOf(0.1f, 0.2f)
-            embeddings[1] shouldBe listOf(0.3f, 0.4f)
+            embeddings[0] shouldBe List(Chunk.EMBEDDING_DIMENSIONS) { 0.1f }
+            embeddings[1] shouldBe List(Chunk.EMBEDDING_DIMENSIONS) { 0.3f }
             server.verify()
         }
 
@@ -68,6 +71,19 @@ class OpenAiEmbeddingProviderTest :
             server
                 .expect(requestTo("https://api.openai.test/v1/embeddings"))
                 .andRespond(withStatus(HttpStatus.UNAUTHORIZED))
+
+            shouldThrow<EmbeddingProviderException> {
+                provider.embed(listOf("texto"))
+            }
+        }
+
+        test("embedding com dimensão diferente de 1536 lança EmbeddingProviderException") {
+            val (provider, server) = buildProvider()
+            val responseJson = """{ "data": [ { "embedding": [0.1, 0.2], "index": 0 } ] }"""
+
+            server
+                .expect(requestTo("https://api.openai.test/v1/embeddings"))
+                .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON))
 
             shouldThrow<EmbeddingProviderException> {
                 provider.embed(listOf("texto"))

@@ -11,17 +11,13 @@ import com.eloiza.finrag.domain.model.Chunk
 import com.eloiza.finrag.domain.port.EmbeddingProvider
 import com.eloiza.finrag.infrastructure.persistence.JpaChunkRepository
 import com.eloiza.finrag.infrastructure.persistence.JpaDocumentRepository
+import com.eloiza.finrag.renderPdf
 import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.PDPage
-import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.font.PDType1Font
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName
 import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
@@ -37,7 +33,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
-import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 @ApplyExtension(SpringExtension::class)
@@ -204,23 +199,5 @@ class ControllableFakeEmbeddingProvider : EmbeddingProvider {
             throw EmbeddingProviderException("falha simulada do provedor de embeddings")
         }
         return texts.map { text -> List(Chunk.EMBEDDING_DIMENSIONS) { text.hashCode().toFloat() } }
-    }
-}
-
-private fun renderPdf(text: String): ByteArray {
-    PDDocument().use { document ->
-        val page = PDPage()
-        document.addPage(page)
-        PDPageContentStream(document, page).use { contentStream ->
-            contentStream.beginText()
-            contentStream.setFont(PDType1Font(FontName.HELVETICA), 12f)
-            contentStream.newLineAtOffset(50f, 700f)
-            contentStream.showText(text)
-            contentStream.endText()
-        }
-
-        val output = ByteArrayOutputStream()
-        document.save(output)
-        return output.toByteArray()
     }
 }
