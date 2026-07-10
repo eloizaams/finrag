@@ -12,8 +12,8 @@ class AskQuestionUseCase(
     private val chunkSearchRepository: ChunkSearchRepository,
     private val ragPromptBuilder: RagPromptBuilder,
     private val llmClient: LlmClient,
-    private val topK: Int = 5,
-    private val minSimilarity: Double = 0.25,
+    private val topK: Int,
+    private val minSimilarity: Double,
 ) {
     fun ask(
         userId: UUID,
