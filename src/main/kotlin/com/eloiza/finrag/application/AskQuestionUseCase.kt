@@ -1,6 +1,5 @@
 package com.eloiza.finrag.application
 
-import com.eloiza.finrag.domain.exception.BlankQuestionException
 import com.eloiza.finrag.domain.model.Answer
 import com.eloiza.finrag.domain.model.Source
 import com.eloiza.finrag.domain.port.ChunkSearchRepository
@@ -20,10 +19,6 @@ class AskQuestionUseCase(
         userId: UUID,
         question: String,
     ): Answer {
-        if (question.isBlank()) {
-            throw BlankQuestionException()
-        }
-
         val queryEmbedding = embeddingProvider.embed(listOf(question)).first()
         val chunks = chunkSearchRepository.findMostSimilar(userId, queryEmbedding, topK)
         if (chunks.isEmpty()) {

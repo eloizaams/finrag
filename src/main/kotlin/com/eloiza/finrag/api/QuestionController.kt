@@ -3,6 +3,7 @@ package com.eloiza.finrag.api
 import com.eloiza.finrag.api.dto.AnswerResponse
 import com.eloiza.finrag.api.dto.QuestionRequest
 import com.eloiza.finrag.application.AskQuestionUseCase
+import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -18,6 +19,6 @@ class QuestionController(
     @PostMapping
     fun ask(
         @AuthenticationPrincipal userId: UUID,
-        @RequestBody request: QuestionRequest,
+        @Valid @RequestBody request: QuestionRequest,
     ): AnswerResponse = AnswerResponse.from(askQuestionUseCase.ask(userId, request.question))
 }

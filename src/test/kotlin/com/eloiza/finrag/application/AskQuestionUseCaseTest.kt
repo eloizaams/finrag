@@ -1,6 +1,5 @@
 package com.eloiza.finrag.application
 
-import com.eloiza.finrag.domain.exception.BlankQuestionException
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
 import com.eloiza.finrag.domain.exception.LlmProviderException
 import com.eloiza.finrag.domain.model.ScoredChunk
@@ -48,24 +47,6 @@ class AskQuestionUseCaseTest :
             answer.sources shouldBe listOf(Source.from(chunk))
             chunkSearchRepository.lastUserId shouldBe userId
             chunkSearchRepository.lastK shouldBe 5
-        }
-
-        test("pergunta em branco lança BlankQuestionException e não chama busca nem LLM") {
-            val chunkSearchRepository = FakeChunkSearchRepository()
-            val llmClient = FakeLlmClient()
-            val useCase =
-                AskQuestionUseCase(
-                    embeddingProvider = FakeEmbeddingProvider(),
-                    chunkSearchRepository = chunkSearchRepository,
-                    ragPromptBuilder = RagPromptBuilder(),
-                    llmClient = llmClient,
-                )
-
-            shouldThrow<BlankQuestionException> {
-                useCase.ask(userId, "   ")
-            }
-            chunkSearchRepository.lastUserId.shouldBeNull()
-            llmClient.called shouldBe false
         }
 
         test("busca sem resultados devolve resposta padrão sem chamar o LLM") {
