@@ -22,7 +22,8 @@ class DocumentRepositoryJpaAdapter(
         return document
     }
 
-    override fun findAllByUserId(userId: UUID): List<Document> = jpaDocumentRepository.findAllByUserId(userId).map { it.toDomain() }
+    override fun findAllByUserId(userId: UUID): List<Document> =
+        jpaDocumentRepository.findAllByUserIdOrderByCreatedAtDesc(userId).map { it.toDomain() }
 }
 
 private fun Document.toEntity() =

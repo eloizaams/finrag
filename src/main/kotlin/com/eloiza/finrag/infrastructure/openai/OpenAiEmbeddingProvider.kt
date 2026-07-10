@@ -15,7 +15,9 @@ class OpenAiEmbeddingProvider(
 ) : EmbeddingProvider {
     private val restClient = restClientBuilder.baseUrl(properties.baseUrl).build()
 
-    override fun embed(texts: List<String>): List<List<Float>> {
+    override fun embed(texts: List<String>): List<List<Float>> = texts.chunked(MAX_BATCH_SIZE).flatMap { batch -> embedBatch(batch) }
+
+    private fun embedBatch(texts: List<String>): List<List<Float>> {
         try {
             val response =
                 restClient
@@ -27,10 +29,20 @@ class OpenAiEmbeddingProvider(
                     .body<EmbeddingResponse>()
                     ?: throw EmbeddingProviderException("Resposta vazia da API de embeddings da OpenAI")
 
+            if (response.data.size != texts.size) {
+                throw EmbeddingProviderException(
+                    "OpenAI retornou ${response.data.size} embeddings para ${texts.size} textos enviados",
+                )
+            }
+
             return response.data.sortedBy { it.index }.map { it.embedding }
         } catch (e: RestClientException) {
             throw EmbeddingProviderException("Falha ao chamar a API de embeddings da OpenAI", e)
         }
+    }
+
+    private companion object {
+        const val MAX_BATCH_SIZE = 2048
     }
 }
 

@@ -38,7 +38,7 @@ class TextChunker(
         for (paragraph in paragraphs) {
             if (paragraph.length > maxChars) {
                 flushBuffer()
-                chunks.addAll(paragraph.chunked(maxChars))
+                chunks.addAll(paragraph.chunked(maxChars).filter { it.isNotBlank() })
                 continue
             }
 

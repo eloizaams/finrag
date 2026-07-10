@@ -149,7 +149,7 @@ class DocumentControllerTest(
             val response = uploadRaw(token, "vazio.md", "   \n\n   ".toByteArray())
 
             response.statusCode shouldBe HttpStatus.UNPROCESSABLE_CONTENT
-            jpaDocumentRepository.findAllByUserId(userId).shouldBeEmpty()
+            jpaDocumentRepository.findAllByUserIdOrderByCreatedAtDesc(userId).shouldBeEmpty()
         }
 
         test("falha do provedor de embeddings retorna 502 e não persiste documento nem chunks") {
@@ -159,7 +159,7 @@ class DocumentControllerTest(
             val response = uploadRaw(token, "relatorio.md", "Receita liquida de R$ 100 milhoes.".toByteArray())
 
             response.statusCode shouldBe HttpStatus.BAD_GATEWAY
-            jpaDocumentRepository.findAllByUserId(userId).shouldBeEmpty()
+            jpaDocumentRepository.findAllByUserIdOrderByCreatedAtDesc(userId).shouldBeEmpty()
         }
 
         test("GET /documents retorna só os documentos do usuário do token") {
