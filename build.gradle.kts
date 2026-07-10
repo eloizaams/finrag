@@ -60,4 +60,5 @@ tasks.withType<Test> {
     useJUnitPlatform()
     environment("JWT_SECRET", "test-only-secret-do-not-use-in-production-1234567890")
     environment("OPENAI_API_KEY", "test-only-openai-key-not-real")
+    environment("ANTHROPIC_API_KEY", "test-only-anthropic-key-not-real")
 }
