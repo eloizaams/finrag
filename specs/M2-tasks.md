@@ -19,11 +19,11 @@
 
 ## Casos de uso
 
-- [ ] Implementar `application/IngestDocumentUseCase.kt` (+ teste unitário com
+- [x] Implementar `application/IngestDocumentUseCase.kt` (+ teste unitário com
       fakes de `TextExtractor`/`EmbeddingProvider`/`DocumentRepository`:
       fluxo feliz, extensão não suportada, texto em branco, falha de
       embeddings não chama o repositório)
-- [ ] Implementar `application/ListDocumentsUseCase.kt` (+ teste unitário com
+- [x] Implementar `application/ListDocumentsUseCase.kt` (+ teste unitário com
       fake de `DocumentRepository`)
 
 ## Infraestrutura — parsing
