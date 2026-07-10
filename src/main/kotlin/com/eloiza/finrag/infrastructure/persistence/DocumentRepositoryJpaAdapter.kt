@@ -18,7 +18,7 @@ class DocumentRepositoryJpaAdapter(
         chunks: List<Chunk>,
     ): Document {
         jpaDocumentRepository.save(document.toEntity())
-        jpaChunkRepository.saveAll(chunks.map { it.toEntity() })
+        jpaChunkRepository.saveAll(chunks.map { it.toEntity(document.userId) })
         return document
     }
 
@@ -44,10 +44,11 @@ private fun DocumentEntity.toDomain() =
         createdAt = createdAt,
     )
 
-private fun Chunk.toEntity() =
+private fun Chunk.toEntity(userId: UUID) =
     ChunkEntity(
         id = id,
         documentId = documentId,
+        userId = userId,
         index = index,
         content = content,
         embedding = embedding.toFloatArray(),

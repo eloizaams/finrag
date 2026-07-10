@@ -16,6 +16,8 @@ class ChunkEntity(
     val id: UUID,
     @Column(name = "document_id", nullable = false)
     val documentId: UUID,
+    @Column(name = "user_id", nullable = false)
+    val userId: UUID,
     @Column(name = "chunk_index", nullable = false)
     val index: Int,
     @Column(nullable = false)

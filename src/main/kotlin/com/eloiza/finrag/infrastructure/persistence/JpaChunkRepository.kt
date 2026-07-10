@@ -15,7 +15,7 @@ interface JpaChunkRepository : JpaRepository<ChunkEntity, UUID> {
                    1 - (c.embedding <=> CAST(:queryEmbedding AS vector)) AS similarity
             FROM chunks c
             JOIN documents d ON d.id = c.document_id
-            WHERE d.user_id = :userId
+            WHERE c.user_id = :userId
             ORDER BY c.embedding <=> CAST(:queryEmbedding AS vector)
             LIMIT :k
         """,
