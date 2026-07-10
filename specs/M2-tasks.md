@@ -95,16 +95,18 @@
 > derivado do texto; modo de falha para o cenário de erro) — OpenAI real nunca
 > é chamada nos testes.
 
-- [ ] Ingestão de PDF com sucesso → `201`, metadados no corpo, chunks +
+- [x] Ingestão de PDF com sucesso → `201`, metadados no corpo, chunks +
       embeddings no banco batendo com o `chunkCount` retornado
-- [ ] Ingestão de Markdown com sucesso → `201`
-- [ ] Upload de formato não suportado (ex.: `.png`) → `415`
-- [ ] Upload de arquivo vazio / sem texto extraível → `422`, nada persistido
-- [ ] Fake de embeddings em modo de falha → `502`, nenhuma linha em
+- [x] Ingestão de Markdown com sucesso → `201`
+- [x] Upload de formato não suportado (ex.: `.png`) → `415`
+- [x] Upload de arquivo vazio / sem texto extraível → `422` (`HttpStatus`
+      atual é `UNPROCESSABLE_CONTENT`; `UNPROCESSABLE_ENTITY` ficou
+      deprecated no Spring Framework 7), nada persistido
+- [x] Fake de embeddings em modo de falha → `502`, nenhuma linha em
       `documents`/`chunks` (atomicidade, critério 7)
-- [ ] `GET /documents` retorna só os documentos do usuário do token (criar
+- [x] `GET /documents` retorna só os documentos do usuário do token (criar
       dois usuários, cada um com documento, e conferir o isolamento)
-- [ ] `POST /documents` e `GET /documents` sem token → `401`
+- [x] `POST /documents` e `GET /documents` sem token → `401`
 
 ## Fechamento do marco
 

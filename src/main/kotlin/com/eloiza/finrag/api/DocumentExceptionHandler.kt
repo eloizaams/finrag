@@ -17,7 +17,7 @@ class DocumentExceptionHandler {
 
     @ExceptionHandler(EmptyDocumentException::class)
     fun handleEmptyDocument(ex: EmptyDocumentException): ProblemDetail =
-        ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.message ?: "Documento vazio ou sem texto extraível")
+        ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.message ?: "Documento vazio ou sem texto extraível")
 
     @ExceptionHandler(EmbeddingProviderException::class)
     fun handleEmbeddingProvider(ex: EmbeddingProviderException): ProblemDetail =
