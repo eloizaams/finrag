@@ -2,16 +2,16 @@
 
 ## Domínio e portas
 
-- [ ] Criar `domain/model/Document.kt` e `domain/model/Chunk.kt`
-- [ ] Criar `domain/model/DocumentType.kt` (enum PDF/MARKDOWN,
+- [x] Criar `domain/model/Document.kt` e `domain/model/Chunk.kt`
+- [x] Criar `domain/model/DocumentType.kt` (enum PDF/MARKDOWN,
       `fromFilename()` lançando exceção para extensão desconhecida)
-- [ ] Criar exceções de domínio: `UnsupportedDocumentTypeException`,
+- [x] Criar exceções de domínio: `UnsupportedDocumentTypeException`,
       `EmptyDocumentException`, `EmbeddingProviderException`
-- [ ] Criar `domain/port/DocumentRepository.kt` (interface:
+- [x] Criar `domain/port/DocumentRepository.kt` (interface:
       `save(document, chunks)` atômico, `findAllByUserId`)
-- [ ] Criar `domain/port/TextExtractor.kt` (interface: `extract(bytes, type)`)
-- [ ] Criar `domain/port/EmbeddingProvider.kt` (interface: `embed(texts)`)
-- [ ] Implementar `domain/service/TextChunker.kt` (parágrafos agregados até
+- [x] Criar `domain/port/TextExtractor.kt` (interface: `extract(bytes, type)`)
+- [x] Criar `domain/port/EmbeddingProvider.kt` (interface: `embed(texts)`)
+- [x] Implementar `domain/service/TextChunker.kt` (parágrafos agregados até
       `max-chars`, overlap, fatiamento de parágrafo gigante) + teste unitário
       puro: texto menor que um chunk, múltiplos parágrafos agregados,
       parágrafo maior que o limite, overlap presente entre chunks vizinhos,
