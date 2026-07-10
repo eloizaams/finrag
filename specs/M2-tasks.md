@@ -53,10 +53,14 @@
 
 ## Infraestrutura — OpenAI
 
-- [x] ~~Promover `spring-boot-restclient` de `testImplementation` para
-      `implementation`~~ — não foi necessário: `RestClient` já vem
-      transitivamente do `spring-boot-starter-web`, e `MockRestServiceServer`
-      já está disponível pelos `testImplementation` existentes
+- [x] Promover `spring-boot-restclient` de `testImplementation` para
+      `implementation` — a suposição inicial de que não seria necessário
+      (por o `RestClient` "vir" do `spring-boot-starter-web`) estava errada:
+      os testes passavam porque `spring-boot-restclient` continuava no
+      classpath de teste, mas faltava `RestClient.Builder` em runtime
+      (`bootJar`). Só foi pego na validação manual via `docker compose up`,
+      não pelos testes — os `@SpringBootTest` não pegam esse tipo de gap de
+      dependência porque compartilham o classpath de teste com o de main
 - [x] Criar `infrastructure/openai/OpenAiProperties.kt`
       (`@ConfigurationProperties`: `api-key`, `base-url`, `embedding-model`;
       primeira vez usando essa anotação no projeto — registrada via
@@ -113,9 +117,13 @@
 - [x] Rodar `./gradlew build` limpo (build + todos os testes)
 - [x] Atualizar README (endpoints `/documents` com exemplos de `curl` — upload
       e listagem —, env var `OPENAI_API_KEY` obrigatória)
-- [ ] Validar fluxo completo via `docker compose up` com a OpenAI real: subir
+- [x] Validar fluxo completo via `docker compose up` com a OpenAI real: subir
       um PDF e um Markdown de verdade, conferir chunks/embeddings no banco,
-      listar, e conferir os erros 415/422/413
+      listar, e conferir os erros 415/422/413 — pegou dois bugs reais que os
+      testes automatizados não cobriam: `spring-boot-restclient` faltando em
+      runtime (container não subia) e `DocumentExceptionHandler` sem
+      `@Order(HIGHEST_PRECEDENCE)`, perdendo pro `ProblemDetailsExceptionHandler`
+      do Spring Boot no 413 (mensagem genérica em inglês em vez da nossa)
 - [x] Commit(s) semânticos ao longo da implementação
 - [ ] Abrir PR de `feature/m2-ingestao-documentos` para `develop`, CI verde
 

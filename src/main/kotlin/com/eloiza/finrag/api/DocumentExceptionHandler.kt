@@ -3,6 +3,8 @@ package com.eloiza.finrag.api
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
 import com.eloiza.finrag.domain.exception.EmptyDocumentException
 import com.eloiza.finrag.domain.exception.UnsupportedDocumentTypeException
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 
 @RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class DocumentExceptionHandler {
     @ExceptionHandler(UnsupportedDocumentTypeException::class)
     fun handleUnsupportedType(ex: UnsupportedDocumentTypeException): ProblemDetail =
