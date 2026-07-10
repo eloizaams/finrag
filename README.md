@@ -20,7 +20,11 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 
 Requisitos: Docker e Docker Compose.
 
+A ingestão de documentos (`POST /documents`) chama a API de embeddings da OpenAI,
+então defina uma chave válida antes de subir o ambiente:
+
 ```bash
+export OPENAI_API_KEY=sk-...
 docker compose up
 ```
 
@@ -46,10 +50,12 @@ docker run -d --name finrag-db -p 5432:5432 \
 ```
 
 Defina o segredo do JWT (obrigatório, sem valor padrão — precisa ter pelo
-menos 32 bytes para o HS256) e rode a aplicação:
+menos 32 bytes para o HS256) e a chave da OpenAI (obrigatória, também sem
+valor padrão) e rode a aplicação:
 
 ```bash
 export JWT_SECRET=um-segredo-de-desenvolvimento-com-pelo-menos-32-bytes
+export OPENAI_API_KEY=sk-...
 ./gradlew bootRun
 ```
 
@@ -68,11 +74,37 @@ curl -X POST http://localhost:8080/auth/register \
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"ana@email.com","password":"senha123"}'
+```
 
-# rota autenticada: envie o token no header Authorization
-curl http://localhost:8080/algum-endpoint-protegido \
+Rotas autenticadas recebem o token no header `Authorization: Bearer <accessToken>`,
+como nos exemplos de `/documents` abaixo.
+
+## Documentos
+
+Ingestão de documentos financeiros (PDF ou Markdown, até 10MB): o texto é
+extraído, dividido em chunks e cada chunk vira um embedding
+(`text-embedding-3-small`), tudo persistido de forma atômica.
+
+```bash
+# upload — retorna 201 com { id, filename, chunkCount, createdAt }
+curl -X POST http://localhost:8080/documents \
+  -H "Authorization: Bearer <accessToken>" \
+  -F "file=@relatorio-trimestral.pdf"
+
+# listagem — só os documentos do usuário autenticado
+curl http://localhost:8080/documents \
   -H "Authorization: Bearer <accessToken>"
 ```
+
+Erros mapeados para `ProblemDetail`:
+
+| Situação                                    | Status |
+|----------------------------------------------|--------|
+| Extensão não suportada (fora de `.pdf`/`.md`) | `415`  |
+| Arquivo vazio ou sem texto extraível          | `422`  |
+| Falha ao gerar embeddings (OpenAI)            | `502`  |
+| Arquivo maior que o limite configurado        | `413`  |
+| Sem token / token inválido                    | `401`  |
 
 ## Comandos úteis
 

@@ -30,6 +30,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.apache.pdfbox:pdfbox:3.0.7")
+    implementation("org.hibernate.orm:hibernate-vector")
+    implementation("org.springframework.boot:spring-boot-restclient")
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
@@ -37,7 +40,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-resttestclient")
-    testImplementation("org.springframework.boot:spring-boot-restclient")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
@@ -57,4 +59,5 @@ kotlin {
 tasks.withType<Test> {
     useJUnitPlatform()
     environment("JWT_SECRET", "test-only-secret-do-not-use-in-production-1234567890")
+    environment("OPENAI_API_KEY", "test-only-openai-key-not-real")
 }
