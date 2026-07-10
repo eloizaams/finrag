@@ -1,6 +1,6 @@
 package com.eloiza.finrag.api.dto
 
-import com.eloiza.finrag.domain.model.Source
+import com.eloiza.finrag.domain.model.ScoredChunk
 import java.util.UUID
 
 data class SourceResponse(
@@ -10,12 +10,16 @@ data class SourceResponse(
     val similarity: Double,
 ) {
     companion object {
-        fun from(source: Source) =
+        const val EXCERPT_MAX_CHARS = 200
+
+        fun from(chunk: ScoredChunk) =
             SourceResponse(
-                documentId = source.documentId,
-                filename = source.filename,
-                excerpt = source.excerpt,
-                similarity = source.similarity,
+                documentId = chunk.documentId,
+                filename = chunk.filename,
+                excerpt = chunk.content.toExcerpt(),
+                similarity = chunk.similarity,
             )
+
+        private fun String.toExcerpt(): String = if (length <= EXCERPT_MAX_CHARS) this else take(EXCERPT_MAX_CHARS) + "…"
     }
 }

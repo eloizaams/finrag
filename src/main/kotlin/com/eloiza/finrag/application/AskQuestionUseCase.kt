@@ -1,7 +1,6 @@
 package com.eloiza.finrag.application
 
 import com.eloiza.finrag.domain.model.Answer
-import com.eloiza.finrag.domain.model.Source
 import com.eloiza.finrag.domain.port.ChunkSearchRepository
 import com.eloiza.finrag.domain.port.EmbeddingProvider
 import com.eloiza.finrag.domain.port.LlmClient
@@ -32,7 +31,7 @@ class AskQuestionUseCase(
         val prompt = ragPromptBuilder.build(question, chunks)
         val text = llmClient.generate(prompt.system, prompt.user)
 
-        return Answer(text = text, sources = chunks.map { Source.from(it) })
+        return Answer(text = text, sources = chunks)
     }
 
     private companion object {

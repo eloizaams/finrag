@@ -3,7 +3,6 @@ package com.eloiza.finrag.application
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
 import com.eloiza.finrag.domain.exception.LlmProviderException
 import com.eloiza.finrag.domain.model.ScoredChunk
-import com.eloiza.finrag.domain.model.Source
 import com.eloiza.finrag.domain.service.RagPromptBuilder
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
@@ -45,7 +44,7 @@ class AskQuestionUseCaseTest :
             val answer = useCase.ask(userId, "Qual foi a receita no Q3?")
 
             answer.text shouldBe "A receita foi de R\$ 10 milhões [relatorio-q3.pdf]."
-            answer.sources shouldBe listOf(Source.from(chunk))
+            answer.sources shouldBe listOf(chunk)
             chunkSearchRepository.lastUserId shouldBe userId
             chunkSearchRepository.lastK shouldBe 5
         }
@@ -85,7 +84,7 @@ class AskQuestionUseCaseTest :
 
             val answer = useCase.ask(userId, "Qualquer pergunta")
 
-            answer.sources shouldBe listOf(Source.from(relevant))
+            answer.sources shouldBe listOf(relevant)
         }
 
         test("somente chunks irrelevantes devolve resposta padrão sem chamar o LLM") {
