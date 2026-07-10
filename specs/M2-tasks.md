@@ -74,16 +74,20 @@
 
 ## API
 
-- [ ] Configurar `spring.servlet.multipart.max-file-size: 10MB` (e
+- [x] Configurar `spring.servlet.multipart.max-file-size: 10MB` (e
       `max-request-size: 11MB`)
-- [ ] Criar DTO `DocumentResponse` (id, filename, chunkCount, createdAt)
-- [ ] Implementar `api/DocumentController.kt` (`POST /documents` multipart +
-      `GET /documents`, `userId` lido do `SecurityContext`)
-- [ ] Implementar `api/DocumentExceptionHandler.kt` (`@RestControllerAdvice` →
+- [x] Criar DTO `DocumentResponse` (id, filename, chunkCount, createdAt)
+- [x] Implementar `api/DocumentController.kt` (`POST /documents` multipart +
+      `GET /documents`, `userId` lido do `SecurityContext` via
+      `@AuthenticationPrincipal` — o filtro JWT já injeta o `UUID` do
+      usuário como principal)
+- [x] Implementar `api/DocumentExceptionHandler.kt` (`@RestControllerAdvice` →
       `ProblemDetail`: `415`, `422`, `502` e `MaxUploadSizeExceededException`
       → `413`)
-- [ ] Registrar os novos use cases no `UseCaseConfig` (composition root)
-- [ ] Adicionar `OPENAI_API_KEY` ao serviço da API no `docker-compose.yml`
+- [x] Registrar os novos use cases no `UseCaseConfig` (composition root;
+      `TextChunker` também virou bean, parametrizado por
+      `finrag.chunking.*` via `@Value`)
+- [x] Adicionar `OPENAI_API_KEY` ao serviço da API no `docker-compose.yml`
 
 ## Testes de integração (Kotest + Testcontainers)
 
