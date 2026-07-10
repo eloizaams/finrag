@@ -18,6 +18,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
@@ -43,6 +44,7 @@ class QuestionControllerTest(
     restTemplate: TestRestTemplate,
     fakeEmbeddingProvider: BagOfWordsFakeEmbeddingProvider,
     fakeLlmClient: ControllableFakeLlmClient,
+    meterRegistry: MeterRegistry,
 ) : FunSpec({
 
         fun uniqueEmail() = "user-${UUID.randomUUID()}@email.com"
@@ -113,6 +115,21 @@ class QuestionControllerTest(
             body.sources.first().filename shouldBe "receita.md"
         }
 
+        test("pergunta respondida com sucesso incrementa finrag.llm.tokens (prompt e completion)") {
+            val (_, token) = registerAndLogin()
+            uploadDocument(token, "receita.md", "A receita liquida da empresa cresceu no terceiro trimestre.")
+            val promptBefore = meterRegistry.find("finrag.llm.tokens").tags("type", "prompt").counter()?.count() ?: 0.0
+            val completionBefore = meterRegistry.find("finrag.llm.tokens").tags("type", "completion").counter()?.count() ?: 0.0
+
+            val response = ask(token, "Qual foi a receita no terceiro trimestre?")
+
+            response.statusCode shouldBe HttpStatus.OK
+            val promptAfter = meterRegistry.find("finrag.llm.tokens").tags("type", "prompt").counter()?.count() ?: 0.0
+            val completionAfter = meterRegistry.find("finrag.llm.tokens").tags("type", "completion").counter()?.count() ?: 0.0
+            promptAfter shouldBe promptBefore + 50.0
+            completionAfter shouldBe completionBefore + 10.0
+        }
+
         test("isolamento por usuário: fontes de outro usuário nunca aparecem, mesmo sendo mais similares") {
             val (_, tokenA) = registerAndLogin()
             val (_, tokenB) = registerAndLogin()
@@ -156,23 +173,49 @@ class QuestionControllerTest(
             response.statusCode shouldBe HttpStatus.BAD_REQUEST
         }
 
-        test("falha do provedor de embeddings retorna 502") {
+        test("falha do provedor de embeddings retorna 502 e incrementa finrag.provider.errors") {
             val (_, token) = registerAndLogin()
             fakeEmbeddingProvider.shouldFail = true
+            val before =
+                meterRegistry
+                    .find("finrag.provider.errors")
+                    .tags("provider", "openai", "error_type", "EmbeddingProviderException")
+                    .counter()
+                    ?.count() ?: 0.0
 
             val response = askRaw(token, "Qualquer pergunta")
 
             response.statusCode shouldBe HttpStatus.BAD_GATEWAY
+            val after =
+                meterRegistry
+                    .find("finrag.provider.errors")
+                    .tags("provider", "openai", "error_type", "EmbeddingProviderException")
+                    .counter()
+                    ?.count() ?: 0.0
+            after shouldBe before + 1.0
         }
 
-        test("falha do provedor de LLM retorna 502") {
+        test("falha do provedor de LLM retorna 502 e incrementa finrag.provider.errors") {
             val (_, token) = registerAndLogin()
             uploadDocument(token, "receita.md", "A receita liquida da empresa cresceu no terceiro trimestre.")
             fakeLlmClient.shouldFail = true
+            val before =
+                meterRegistry
+                    .find("finrag.provider.errors")
+                    .tags("provider", "anthropic", "error_type", "LlmProviderException")
+                    .counter()
+                    ?.count() ?: 0.0
 
             val response = askRaw(token, "Qual foi a receita no terceiro trimestre?")
 
             response.statusCode shouldBe HttpStatus.BAD_GATEWAY
+            val after =
+                meterRegistry
+                    .find("finrag.provider.errors")
+                    .tags("provider", "anthropic", "error_type", "LlmProviderException")
+                    .counter()
+                    ?.count() ?: 0.0
+            after shouldBe before + 1.0
         }
 
         test("POST /questions sem token retorna 401") {

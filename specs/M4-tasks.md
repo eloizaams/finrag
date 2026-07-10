@@ -45,10 +45,12 @@
 
 ## API
 
-- [ ] Atualizar `api/ProviderExceptionHandler.kt`: incrementar `finrag.provider.errors`
+- [x] Atualizar `api/ProviderExceptionHandler.kt`: incrementar `finrag.provider.errors`
       (tags `provider=openai|anthropic`, `error_type=<nome da exceção>`) ao tratar
       `EmbeddingProviderException`/`LlmProviderException`
-- [ ] Teste cobrindo o incremento do contador de erro ao simular falha de cada provedor
+- [x] Teste cobrindo o incremento do contador de erro ao simular falha de cada provedor
+      (em `QuestionControllerTest`, que já simulava as duas falhas) — também aproveitado
+      para cobrir `finrag.llm.tokens` incrementando numa pergunta respondida com sucesso
 
 ## Configuração
 
@@ -64,9 +66,9 @@
 - [ ] Log de uma requisição a `POST /questions` contém `trace.id`/`transaction.id`
       preenchidos (capturado via `OutputCaptureExtension`/`CapturedOutput` do Spring
       Boot Test, parseando a saída como JSON)
-- [ ] Após `POST /questions` respondida com sucesso, métrica `finrag.llm.tokens`
+- [x] Após `POST /questions` respondida com sucesso, métrica `finrag.llm.tokens`
       incrementou (prompt e completion)
-- [ ] Após falha simulada do provedor OpenAI (embeddings) ou Anthropic (LLM), métrica
+- [x] Após falha simulada do provedor OpenAI (embeddings) ou Anthropic (LLM), métrica
       `finrag.provider.errors` incrementou com a tag de provedor correta
 - [ ] Nenhum dado sensível (senha, token JWT, chave de API, corpo da pergunta/resposta)
       aparece na saída de log capturada nos testes acima
