@@ -125,7 +125,7 @@
       `@Order(HIGHEST_PRECEDENCE)`, perdendo pro `ProblemDetailsExceptionHandler`
       do Spring Boot no 413 (mensagem genérica em inglês em vez da nossa)
 - [x] Commit(s) semânticos ao longo da implementação
-- [ ] Abrir PR de `feature/m2-ingestao-documentos` para `develop`, CI verde
+- [x] Abrir PR de `feature/m2-ingestao-documentos` para `develop`, CI verde
 
 ## Definição de pronto (Definition of Done)
 
