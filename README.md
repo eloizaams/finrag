@@ -144,3 +144,4 @@ Erros mapeados para `ProblemDetail`:
 - Build + testes: `./gradlew build`
 - Só testes: `./gradlew test` (usa Testcontainers — requer Docker rodando)
 - Health check: `GET /actuator/health`
+- Collection do Postman com todos os endpoints: `postman/FinRAG.postman_collection.json`
