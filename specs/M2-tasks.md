@@ -28,10 +28,11 @@
 
 ## Infraestrutura — parsing
 
-- [ ] Adicionar dependência `org.apache.pdfbox:pdfbox:3.0.x`
-- [ ] Implementar `infrastructure/parsing/DefaultTextExtractor.kt` (PDF via
-      `PDFTextStripper`, Markdown via `String(bytes)`) + teste unitário com
-      um PDF pequeno e um Markdown de fixture em `src/test/resources`
+- [x] Adicionar dependência `org.apache.pdfbox:pdfbox:3.0.7`
+- [x] Implementar `infrastructure/parsing/DefaultTextExtractor.kt` (PDF via
+      `PDFTextStripper`, Markdown via `String(bytes)`) + teste unitário: PDF
+      gerado em memória com o próprio PDFBox (ida e volta, sem fixture
+      binária versionada) e Markdown como texto puro
 
 ## Infraestrutura — persistência
 
