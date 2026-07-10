@@ -110,13 +110,13 @@
 
 ## Fechamento do marco
 
-- [ ] Rodar `./gradlew build` limpo (build + todos os testes)
-- [ ] Atualizar README (endpoints `/documents` com exemplos de `curl` — upload
+- [x] Rodar `./gradlew build` limpo (build + todos os testes)
+- [x] Atualizar README (endpoints `/documents` com exemplos de `curl` — upload
       e listagem —, env var `OPENAI_API_KEY` obrigatória)
 - [ ] Validar fluxo completo via `docker compose up` com a OpenAI real: subir
       um PDF e um Markdown de verdade, conferir chunks/embeddings no banco,
       listar, e conferir os erros 415/422/413
-- [ ] Commit(s) semânticos ao longo da implementação
+- [x] Commit(s) semânticos ao longo da implementação
 - [ ] Abrir PR de `feature/m2-ingestao-documentos` para `develop`, CI verde
 
 ## Definição de pronto (Definition of Done)
