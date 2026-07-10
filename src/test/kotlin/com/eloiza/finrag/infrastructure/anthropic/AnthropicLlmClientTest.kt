@@ -83,4 +83,18 @@ class AnthropicLlmClientTest :
                 client.generate("system", "pergunta")
             }
         }
+
+        test("resposta truncada em max_tokens ainda devolve o texto (truncamento é logado, não é erro)") {
+            val (client, server) = buildClient()
+            val responseJson =
+                """
+                { "content": [ { "type": "text", "text": "Resposta cortada no meio" } ], "stop_reason": "max_tokens" }
+                """.trimIndent()
+
+            server
+                .expect(requestTo("https://api.anthropic.test/v1/messages"))
+                .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON))
+
+            client.generate("system", "pergunta") shouldBe "Resposta cortada no meio"
+        }
     })

@@ -3,6 +3,7 @@ package com.eloiza.finrag.infrastructure.anthropic
 import com.eloiza.finrag.domain.exception.LlmProviderException
 import com.eloiza.finrag.domain.port.LlmClient
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
@@ -13,6 +14,7 @@ class AnthropicLlmClient(
     restClientBuilder: RestClient.Builder,
     private val properties: AnthropicProperties,
 ) : LlmClient {
+    private val log = LoggerFactory.getLogger(AnthropicLlmClient::class.java)
     private val restClient = restClientBuilder.baseUrl(properties.baseUrl).build()
 
     override fun generate(
@@ -41,6 +43,12 @@ class AnthropicLlmClient(
             if (text.isNullOrBlank()) {
                 throw LlmProviderException("Anthropic não retornou nenhum bloco de texto na resposta")
             }
+            if (response.stopReason == STOP_REASON_MAX_TOKENS) {
+                log.warn(
+                    "Resposta da Anthropic truncada ao atingir max_tokens={} — considere aumentar finrag.anthropic.max-tokens",
+                    properties.maxTokens,
+                )
+            }
             return text
         } catch (e: RestClientException) {
             throw LlmProviderException("Falha ao chamar a API de mensagens da Anthropic", e)
@@ -51,6 +59,7 @@ class AnthropicLlmClient(
         const val API_KEY_HEADER = "x-api-key"
         const val VERSION_HEADER = "anthropic-version"
         const val VERSION = "2023-06-01"
+        const val STOP_REASON_MAX_TOKENS = "max_tokens"
     }
 }
 
@@ -68,6 +77,7 @@ private data class MessageParam(
 
 private data class MessageResponse(
     val content: List<ContentBlock>,
+    @JsonProperty("stop_reason") val stopReason: String? = null,
 )
 
 private data class ContentBlock(
