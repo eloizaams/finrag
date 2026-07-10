@@ -2,10 +2,10 @@
 
 ## Domínio e portas
 
-- [ ] Criar `domain/model/LlmResponse.kt` (`text`, `promptTokens`, `completionTokens`)
-- [ ] Criar `domain/port/PipelineMetrics.kt` (interface: `recordDuration(pipeline, stage,
+- [x] Criar `domain/model/LlmResponse.kt` (`text`, `promptTokens`, `completionTokens`)
+- [x] Criar `domain/port/PipelineMetrics.kt` (interface: `recordDuration(pipeline, stage,
       block)`, `recordTokens(promptTokens, completionTokens)`)
-- [ ] Atualizar `domain/port/LlmClient.kt`: `generate` passa a retornar `LlmResponse`
+- [x] Atualizar `domain/port/LlmClient.kt`: `generate` passa a retornar `LlmResponse`
       em vez de `String`
 
 ## Casos de uso
