@@ -12,6 +12,18 @@ Permitir que um usuário autenticado envie documentos (PDF/Markdown) e faça per
 em linguagem natural sobre o conteúdo, recebendo respostas fundamentadas nos trechos
 mais relevantes do(s) documento(s), com custo mínimo de operação.
 
+## Status dos marcos
+
+| Marco | Descrição | Status |
+|-------|-----------|--------|
+| M0 | Setup do projeto (Docker, CI, tooling) | ✅ Concluído |
+| M1 | Autenticação (JWT) | ✅ Concluído |
+| M2 | Ingestão de documentos (PDF/Markdown → chunking → embeddings) | ✅ Concluído |
+| M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
+
+Detalhe de cada marco (critérios de aceite, decisões técnicas, checklist) em
+`specs/MX-requirements.md` / `MX-design.md` / `MX-tasks.md`.
+
 ## Diagrama de arquitetura
 
 ```mermaid

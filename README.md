@@ -8,6 +8,15 @@ Arquitetura completa, diagrama e ADRs em [`specs/00-architecture.md`](specs/00-a
 O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 `requirements.md`/`design.md`/`tasks.md` em [`specs/`](specs/).
 
+## Progresso
+
+| Marco | Descrição | Status |
+|-------|-----------|--------|
+| M0 | Setup do projeto (Docker, CI, tooling) | ✅ Concluído |
+| M1 | Autenticação (JWT) | ✅ Concluído |
+| M2 | Ingestão de documentos (PDF/Markdown → chunking → embeddings) | ✅ Concluído |
+| M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
+
 ## Stack
 
 - Kotlin 2.x + Spring Boot 4.x, JDK 21 (toolchain), Gradle Kotlin DSL
