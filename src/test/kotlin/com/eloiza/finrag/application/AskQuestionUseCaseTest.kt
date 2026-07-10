@@ -39,6 +39,7 @@ class AskQuestionUseCaseTest :
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = llmClient,
                     topK = 5,
+                    minSimilarity = 0.25,
                 )
 
             val answer = useCase.ask(userId, "Qual foi a receita no Q3?")
@@ -57,11 +58,51 @@ class AskQuestionUseCaseTest :
                     chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = emptyList()),
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = llmClient,
+                    topK = 5,
+                    minSimilarity = 0.25,
                 )
 
             val answer = useCase.ask(userId, "Pergunta sem contexto indexado")
 
-            answer.text shouldBe "Não há documentos indexados para responder a essa pergunta."
+            answer.text shouldBe "Os documentos indexados não contêm informação relevante para responder a essa pergunta."
+            answer.sources.shouldBeEmpty()
+            llmClient.called shouldBe false
+        }
+
+        test("chunks abaixo do threshold de similaridade são descartados e não vão para o LLM") {
+            val relevant = scoredChunk(filename = "relevante.pdf", similarity = 0.6)
+            val irrelevant = scoredChunk(filename = "irrelevante.pdf", similarity = 0.1)
+            val llmClient = FakeLlmClient(textToReturn = "resposta com base no chunk relevante")
+            val useCase =
+                AskQuestionUseCase(
+                    embeddingProvider = FakeEmbeddingProvider(),
+                    chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = listOf(relevant, irrelevant)),
+                    ragPromptBuilder = RagPromptBuilder(),
+                    llmClient = llmClient,
+                    topK = 5,
+                    minSimilarity = 0.25,
+                )
+
+            val answer = useCase.ask(userId, "Qualquer pergunta")
+
+            answer.sources shouldBe listOf(Source.from(relevant))
+        }
+
+        test("somente chunks irrelevantes devolve resposta padrão sem chamar o LLM") {
+            val llmClient = FakeLlmClient()
+            val useCase =
+                AskQuestionUseCase(
+                    embeddingProvider = FakeEmbeddingProvider(),
+                    chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = listOf(scoredChunk(similarity = 0.1))),
+                    ragPromptBuilder = RagPromptBuilder(),
+                    llmClient = llmClient,
+                    topK = 5,
+                    minSimilarity = 0.25,
+                )
+
+            val answer = useCase.ask(userId, "Pergunta sobre assunto não indexado")
+
+            answer.text shouldBe "Os documentos indexados não contêm informação relevante para responder a essa pergunta."
             answer.sources.shouldBeEmpty()
             llmClient.called shouldBe false
         }
@@ -75,6 +116,8 @@ class AskQuestionUseCaseTest :
                     chunkSearchRepository = chunkSearchRepository,
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = llmClient,
+                    topK = 5,
+                    minSimilarity = 0.25,
                 )
 
             shouldThrow<EmbeddingProviderException> {
@@ -91,6 +134,8 @@ class AskQuestionUseCaseTest :
                     chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = listOf(scoredChunk())),
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = FakeLlmClient(shouldFail = true),
+                    topK = 5,
+                    minSimilarity = 0.25,
                 )
 
             shouldThrow<LlmProviderException> {

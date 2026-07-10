@@ -40,3 +40,4 @@ finrag:
     max-tokens: 1024
   rag:
     top-k: 5
+    min-similarity: 0.25

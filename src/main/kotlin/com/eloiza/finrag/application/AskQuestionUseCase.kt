@@ -14,13 +14,17 @@ class AskQuestionUseCase(
     private val ragPromptBuilder: RagPromptBuilder,
     private val llmClient: LlmClient,
     private val topK: Int = 5,
+    private val minSimilarity: Double = 0.25,
 ) {
     fun ask(
         userId: UUID,
         question: String,
     ): Answer {
         val queryEmbedding = embeddingProvider.embed(listOf(question)).first()
-        val chunks = chunkSearchRepository.findMostSimilar(userId, queryEmbedding, topK)
+        val chunks =
+            chunkSearchRepository
+                .findMostSimilar(userId, queryEmbedding, topK)
+                .filter { it.similarity >= minSimilarity }
         if (chunks.isEmpty()) {
             return Answer(text = NO_CONTEXT_ANSWER, sources = emptyList())
         }
@@ -32,6 +36,6 @@ class AskQuestionUseCase(
     }
 
     private companion object {
-        const val NO_CONTEXT_ANSWER = "Não há documentos indexados para responder a essa pergunta."
+        const val NO_CONTEXT_ANSWER = "Os documentos indexados não contêm informação relevante para responder a essa pergunta."
     }
 }

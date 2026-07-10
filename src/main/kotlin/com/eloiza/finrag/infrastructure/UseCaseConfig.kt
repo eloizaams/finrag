@@ -61,5 +61,7 @@ class UseCaseConfig {
         ragPromptBuilder: RagPromptBuilder,
         llmClient: LlmClient,
         @Value("\${finrag.rag.top-k}") topK: Int,
-    ): AskQuestionUseCase = AskQuestionUseCase(embeddingProvider, chunkSearchRepository, ragPromptBuilder, llmClient, topK)
+        @Value("\${finrag.rag.min-similarity}") minSimilarity: Double,
+    ): AskQuestionUseCase =
+        AskQuestionUseCase(embeddingProvider, chunkSearchRepository, ragPromptBuilder, llmClient, topK, minSimilarity)
 }

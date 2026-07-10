@@ -115,7 +115,7 @@ class QuestionControllerTest(
         test("isolamento por usuário: fontes de outro usuário nunca aparecem, mesmo sendo mais similares") {
             val (_, tokenA) = registerAndLogin()
             val (_, tokenB) = registerAndLogin()
-            uploadDocument(tokenA, "meu.md", "Relatorio trimestral qualquer da minha empresa.")
+            uploadDocument(tokenA, "meu.md", "Receita do terceiro trimestre da minha empresa.")
             uploadDocument(tokenB, "alheio.md", "Receita liquida do terceiro trimestre da outra empresa.")
 
             val response = ask(tokenA, "Qual foi a receita no terceiro trimestre?")
@@ -131,7 +131,19 @@ class QuestionControllerTest(
 
             response.statusCode shouldBe HttpStatus.OK
             val body = response.body!!
-            body.answer shouldBe "Não há documentos indexados para responder a essa pergunta."
+            body.answer shouldBe "Os documentos indexados não contêm informação relevante para responder a essa pergunta."
+            body.sources.shouldBeEmpty()
+        }
+
+        test("usuário só com documentos irrelevantes recebe 200 com resposta padrão e fontes vazias") {
+            val (_, token) = registerAndLogin()
+            uploadDocument(token, "clima.md", "A previsao do tempo indica chuva forte amanha.")
+
+            val response = ask(token, "Qual foi a receita no terceiro trimestre?")
+
+            response.statusCode shouldBe HttpStatus.OK
+            val body = response.body!!
+            body.answer shouldBe "Os documentos indexados não contêm informação relevante para responder a essa pergunta."
             body.sources.shouldBeEmpty()
         }
 
