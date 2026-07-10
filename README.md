@@ -16,6 +16,14 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 | M1 | Autenticação (JWT) | ✅ Concluído |
 | M2 | Ingestão de documentos (PDF/Markdown → chunking → embeddings) | ✅ Concluído |
 | M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
+| M4 | Observabilidade do pipeline RAG | 🔜 Planejado |
+| M5 | Gestão de documentos (GET/DELETE, paginação) | 🔜 Planejado |
+| M6 | Docs da API + hardening | 🔜 Planejado |
+| M7 | Deploy | 🔜 Planejado |
+| M8 | Reservado / a definir | ⬜ Não alocado |
+
+Roadmap completo (motivação e ordem de cada marco futuro) em
+[`specs/01-roadmap.md`](specs/01-roadmap.md).
 
 ## Stack
 

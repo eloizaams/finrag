@@ -20,9 +20,17 @@ mais relevantes do(s) documento(s), com custo mínimo de operação.
 | M1 | Autenticação (JWT) | ✅ Concluído |
 | M2 | Ingestão de documentos (PDF/Markdown → chunking → embeddings) | ✅ Concluído |
 | M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
+| M4 | Observabilidade do pipeline RAG | 🔜 Planejado |
+| M5 | Gestão de documentos (GET/DELETE, paginação) | 🔜 Planejado |
+| M6 | Docs da API + hardening | 🔜 Planejado |
+| M7 | Deploy | 🔜 Planejado |
+| M8 | Reservado / a definir | ⬜ Não alocado |
+| M9 | Backlog opcional (multi-tenancy, re-ranking, SSE, async, golden dataset) | 💤 Backlog |
 
-Detalhe de cada marco (critérios de aceite, decisões técnicas, checklist) em
-`specs/MX-requirements.md` / `MX-design.md` / `MX-tasks.md`.
+Roadmap com motivação de cada marco futuro e ordem de prioridade em
+`specs/01-roadmap.md`. Detalhe de cada marco já iniciado (critérios de
+aceite, decisões técnicas, checklist) em `specs/MX-requirements.md` /
+`MX-design.md` / `MX-tasks.md`.
 
 ## Diagrama de arquitetura
 
