@@ -10,30 +10,31 @@
 
 ## Casos de uso
 
-- [ ] Atualizar `application/AskQuestionUseCase.kt`: envolver
+- [x] Atualizar `application/AskQuestionUseCase.kt`: envolver
       `embeddingProvider.embed`/`chunkSearchRepository.findMostSimilar`/`llmClient.generate`
       com `pipelineMetrics.recordDuration("question", <stage>)`; registrar tokens via
       `pipelineMetrics.recordTokens(...)` após a chamada ao LLM; montar `Answer` a partir
       de `LlmResponse.text`
-- [ ] Atualizar teste unitário de `AskQuestionUseCase` com fake de `PipelineMetrics` e
+- [x] Atualizar teste unitário de `AskQuestionUseCase` com fake de `PipelineMetrics` e
       fake de `LlmClient` retornando `LlmResponse`
-- [ ] Atualizar `application/IngestDocumentUseCase.kt`: envolver
+- [x] Atualizar `application/IngestDocumentUseCase.kt`: envolver
       `textExtractor.extract`/`textChunker.chunk`/`embeddingProvider.embed` com
       `pipelineMetrics.recordDuration("ingestion", <stage>)`
-- [ ] Atualizar teste unitário de `IngestDocumentUseCase` com fake de `PipelineMetrics`
+- [x] Atualizar teste unitário de `IngestDocumentUseCase` com fake de `PipelineMetrics`
 
 ## Infraestrutura — observabilidade
 
 - [ ] Adicionar dependências `io.micrometer:micrometer-registry-prometheus` e
       `io.micrometer:micrometer-tracing-bridge-brave`
-- [ ] Implementar `infrastructure/observability/MicrometerPipelineMetrics.kt`
+- [x] Implementar `infrastructure/observability/MicrometerPipelineMetrics.kt`
       (implementa `PipelineMetrics` com `Timer`/`Counter` do `MeterRegistry`;
       métrica `finrag.pipeline.stage.duration` com tags `pipeline`/`stage`; métrica
       `finrag.llm.tokens` com tag `type=prompt|completion`)
-- [ ] Teste unitário de `MicrometerPipelineMetrics` com `SimpleMeterRegistry`: duração
+- [x] Teste unitário de `MicrometerPipelineMetrics` com `SimpleMeterRegistry`: duração
       registrada com as tags corretas, contagem de tokens incrementada corretamente
-- [ ] Registrar `MicrometerPipelineMetrics` como bean em `infrastructure/UseCaseConfig.kt`
-      (ou configuração dedicada) e injetar nos use cases
+- [x] Registrar `MicrometerPipelineMetrics` como bean em `infrastructure/UseCaseConfig.kt`
+      (ou configuração dedicada) e injetar nos use cases — via `@Component` (component
+      scan já cobre `infrastructure/`), sem precisar de `@Bean` explícito
 
 ## Infraestrutura — Anthropic
 

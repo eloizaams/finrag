@@ -10,6 +10,7 @@ import com.eloiza.finrag.domain.port.DocumentRepository
 import com.eloiza.finrag.domain.port.EmbeddingProvider
 import com.eloiza.finrag.domain.port.LlmClient
 import com.eloiza.finrag.domain.port.PasswordHasher
+import com.eloiza.finrag.domain.port.PipelineMetrics
 import com.eloiza.finrag.domain.port.TextExtractor
 import com.eloiza.finrag.domain.port.TokenProvider
 import com.eloiza.finrag.domain.port.UserRepository
@@ -46,7 +47,9 @@ class UseCaseConfig {
         textChunker: TextChunker,
         embeddingProvider: EmbeddingProvider,
         documentRepository: DocumentRepository,
-    ): IngestDocumentUseCase = IngestDocumentUseCase(textExtractor, textChunker, embeddingProvider, documentRepository)
+        pipelineMetrics: PipelineMetrics,
+    ): IngestDocumentUseCase =
+        IngestDocumentUseCase(textExtractor, textChunker, embeddingProvider, documentRepository, pipelineMetrics)
 
     @Bean
     fun listDocumentsUseCase(documentRepository: DocumentRepository): ListDocumentsUseCase = ListDocumentsUseCase(documentRepository)
@@ -60,6 +63,7 @@ class UseCaseConfig {
         chunkSearchRepository: ChunkSearchRepository,
         ragPromptBuilder: RagPromptBuilder,
         llmClient: LlmClient,
+        pipelineMetrics: PipelineMetrics,
         ragProperties: RagProperties,
     ): AskQuestionUseCase =
         AskQuestionUseCase(
@@ -67,6 +71,7 @@ class UseCaseConfig {
             chunkSearchRepository,
             ragPromptBuilder,
             llmClient,
+            pipelineMetrics,
             ragProperties.topK,
             ragProperties.minSimilarity,
         )

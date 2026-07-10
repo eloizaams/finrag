@@ -10,6 +10,7 @@ import com.eloiza.finrag.api.dto.RegisterResponse
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
 import com.eloiza.finrag.domain.exception.LlmProviderException
 import com.eloiza.finrag.domain.model.Chunk
+import com.eloiza.finrag.domain.model.LlmResponse
 import com.eloiza.finrag.domain.port.EmbeddingProvider
 import com.eloiza.finrag.domain.port.LlmClient
 import io.kotest.core.extensions.ApplyExtension
@@ -234,10 +235,10 @@ class ControllableFakeLlmClient : LlmClient {
     override fun generate(
         systemPrompt: String,
         userPrompt: String,
-    ): String {
+    ): LlmResponse {
         if (shouldFail) {
             throw LlmProviderException("falha simulada do provedor de LLM")
         }
-        return "resposta gerada pelo LLM fake"
+        return LlmResponse(text = "resposta gerada pelo LLM fake", promptTokens = 50, completionTokens = 10)
     }
 }
