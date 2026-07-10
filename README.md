@@ -123,9 +123,12 @@ curl -X POST http://localhost:8080/questions \
   -d '{"question":"Qual foi a receita no terceiro trimestre?"}'
 ```
 
-Retorna `200` com `{ answer, sources: [{ documentId, filename, excerpt, similarity }] }`.
-Sem nenhum documento indexado (ou nenhum resultado na busca), `answer` traz
-uma mensagem padrão avisando disso e `sources` vem vazio — não é erro.
+Retorna `200` com `{ answer, sources: [{ documentId, filename, excerpt, similarity }] }`
+— `excerpt` é um trecho de até 200 caracteres do chunk usado como fonte.
+Chunks com similaridade abaixo do threshold (`finrag.rag.min-similarity`,
+padrão `0.25`) são descartados; sem nenhum chunk relevante (corpus vazio ou
+só documentos sobre outros assuntos), `answer` traz uma mensagem padrão
+avisando disso e `sources` vem vazio — não é erro.
 
 Erros mapeados para `ProblemDetail`:
 

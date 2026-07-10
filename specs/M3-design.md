@@ -144,11 +144,12 @@ finrag:
   anthropic:
     api-key: ${ANTHROPIC_API_KEY}                 # obrigatório via env var, sem default
     base-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}
-    model: claude-haiku-4-5
-    max-tokens: 1024
-  rag:
-    top-k: 5
 ```
+
+`model` (`claude-haiku-4-5`), `max-tokens` (`1024`), `top-k` (`5`) e
+`min-similarity` (`0.25`) têm default no código (`AnthropicProperties` /
+`RagProperties`) e só entram no yaml quando se quer sobrescrever — uma única
+fonte de verdade para cada valor (ajuste pós-code-review, ver seção abaixo).
 
 - `ANTHROPIC_API_KEY` segue a mesma regra do `OPENAI_API_KEY` (M2) e do
   `JWT_SECRET` (M1): env var obrigatória, nunca commitada, nunca logada —
@@ -162,11 +163,12 @@ finrag:
 
 ## Trade-offs conscientes
 
-- **Sem threshold de similaridade**: perguntas totalmente fora do domínio
-  indexado (mas com pelo menos um chunk no banco) sempre retornam algum
-  contexto, mesmo que irrelevante — a defesa é o prompt, não um corte
-  numérico. Calibrar um threshold de verdade é trabalho de M9 (golden
-  dataset).
+- ~~**Sem threshold de similaridade**~~ *(revertido no pós-code-review, ver
+  seção abaixo)*: a v1 original não cortava por similaridade — a defesa era
+  só o prompt. O code review mostrou que sem corte o ramo "sem contexto" era
+  inalcançável para qualquer usuário com documentos, e chunks irrelevantes
+  iam sempre pro LLM. Entrou `min-similarity: 0.25` (conservador,
+  configurável); a calibração fina com golden dataset continua sendo M9.
 - **Sem re-ranking**: os top-k chunks retornados pela busca vetorial vão
   direto pro prompt, sem uma segunda passada de reordenação por relevância.
   ADR-04/CLAUDE.md já colocam re-ranking fora de escopo da v1.
@@ -180,3 +182,38 @@ finrag:
 - **`HNSW` sem `m`/`ef_construction` customizados**: usa os valores padrão
   do pgvector. Ajuste fino de parâmetros do índice é otimização prematura
   sem um volume de dados real para medir contra.
+
+## Ajustes pós-code-review (2026-07-10)
+
+Um code review do marco completo levou a estas mudanças em relação às
+decisões acima (o histórico original foi mantido para registrar a evolução):
+
+- **Threshold de similaridade**: adicionado `finrag.rag.min-similarity`
+  (default `0.25` em `RagProperties`). Motivo: sem corte, `chunks.isEmpty()`
+  só era verdadeiro com corpus vazio — a mensagem padrão prometida pelo
+  README para "nenhum resultado relevante" era inalcançável e chunks
+  irrelevantes iam sempre pro LLM.
+- **Validação da pergunta**: `BlankQuestionException` e o check no use case
+  foram substituídos por `@field:NotBlank` + `@Valid`, o mesmo mecanismo de
+  Bean Validation do M1 — o 400 de `/questions` agora tem o mesmo formato
+  (array `errors`) dos endpoints de auth.
+- **Exception handling**: `QuestionExceptionHandler` foi removido; as falhas
+  de provedor (`EmbeddingProviderException`, `LlmProviderException` → `502`)
+  moraram num `ProviderExceptionHandler` global, eliminando o handler
+  duplicado entre `/documents` e `/questions`.
+- **Modelo `Source` removido**: `Answer` carrega `List<ScoredChunk>` direto
+  e `SourceResponse.from(ScoredChunk)` mapeia pro DTO — eram três cópias
+  idênticas dos mesmos campos. `excerpt` agora é de fato um trecho (até 200
+  chars), não o chunk inteiro.
+- **`stop_reason`**: `AnthropicLlmClient` loga warning quando a resposta é
+  truncada por `max_tokens` (antes o truncamento era silencioso).
+- **Prompt com contexto delimitado**: chunks agora vão dentro de tags
+  `<documento arquivo="...">` e o system prompt instrui a tratar esse
+  conteúdo como dados — mitigação de prompt injection via documento enviado.
+- **`user_id` desnormalizado em `chunks`** (migration `V5`): o filtro de
+  tenant ficava na tabela JOINada, fora do alcance do índice HNSW — em corpus
+  multi-usuário grande isso degrada recall (candidatos ANN globais filtrados
+  depois) ou derruba a query para scan sequencial.
+- **Fonte única de configuração**: defaults de `model`/`max-tokens`/`top-k`/
+  `min-similarity` vivem só no código; o yaml carrega apenas o que vem de
+  env var.
