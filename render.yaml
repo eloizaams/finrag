@@ -1,0 +1,26 @@
+# Blueprint do Render (specs/M7-design.md): web service free buildado do Dockerfile.
+# Deploy automático na main só depois do CI (GitHub Actions) passar.
+services:
+  - type: web
+    name: finrag
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: main
+    healthCheckPath: /actuator/health
+    autoDeployTrigger: checksPass
+    envVars:
+      # Neon (connection string JDBC com ?sslmode=require) — preencher no dashboard
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      # Gerar valor novo de produção (32+ bytes) — não reutilizar o de dev
+      - key: JWT_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

@@ -2,12 +2,12 @@
 
 ## Preparação no repositório
 
-- [ ] Ajustar `Dockerfile`: `-XX:MaxRAMPercentage=75.0` no `ENTRYPOINT`
+- [x] Ajustar `Dockerfile`: `-XX:MaxRAMPercentage=75.0` no `ENTRYPOINT`
       (instância free tem 512MB; default da JVM limitaria o heap a 128MB)
-- [ ] Criar `render.yaml` (Blueprint): web service Docker no plano free,
+- [x] Criar `render.yaml` (Blueprint): web service Docker no plano free,
       `healthCheckPath: /actuator/health`, `autoDeploy` ligado, env vars com
       secrets marcados `sync: false`
-- [ ] Validar que a imagem Docker local sobe e responde com o novo
+- [x] Validar que a imagem Docker local sobe e responde com o novo
       `ENTRYPOINT` (`docker compose up` + health check)
 
 ## Banco (Neon) — passos manuais da autora
