@@ -5,6 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import com.eloiza.finrag.PostgresTestContainer
 import com.eloiza.finrag.api.dto.AnswerResponse
+import com.eloiza.finrag.api.dto.DocumentResponse
 import com.eloiza.finrag.api.dto.LoginRequest
 import com.eloiza.finrag.api.dto.LoginResponse
 import com.eloiza.finrag.api.dto.QuestionRequest
@@ -64,7 +65,7 @@ class QuestionControllerTest(
             token: String,
             filename: String,
             content: String,
-        ) {
+        ): UUID {
             val resource =
                 object : ByteArrayResource(content.toByteArray()) {
                     override fun getFilename() = filename
@@ -76,8 +77,19 @@ class QuestionControllerTest(
             headers.contentType = MediaType.MULTIPART_FORM_DATA
             headers.setBearerAuth(token)
 
-            val response = restTemplate.postForEntity("/documents", HttpEntity(body, headers), String::class.java)
+            val response = restTemplate.postForEntity("/documents", HttpEntity(body, headers), DocumentResponse::class.java)
             check(response.statusCode == HttpStatus.CREATED) { "falha ao preparar fixture: ${response.statusCode} ${response.body}" }
+            return response.body!!.id
+        }
+
+        fun deleteDocument(
+            token: String,
+            documentId: UUID,
+        ) {
+            val headers = HttpHeaders()
+            headers.setBearerAuth(token)
+            val response = restTemplate.exchange("/documents/$documentId", HttpMethod.DELETE, HttpEntity<Void>(headers), Void::class.java)
+            check(response.statusCode == HttpStatus.NO_CONTENT) { "falha ao preparar fixture: ${response.statusCode}" }
         }
 
         fun askRequest(
@@ -176,6 +188,19 @@ class QuestionControllerTest(
             val body = response.body!!
             body.answer shouldBe "Os documentos indexados não contêm informação relevante para responder a essa pergunta."
             body.sources.shouldBeEmpty()
+        }
+
+        test("chunks de documento deletado não aparecem mais como fonte") {
+            val (_, token) = registerAndLogin()
+            val documentId = uploadDocument(token, "receita.md", "A receita liquida da empresa cresceu no terceiro trimestre.")
+
+            deleteDocument(token, documentId)
+            val response = ask(token, "Qual foi a receita no terceiro trimestre?")
+
+            response.statusCode shouldBe HttpStatus.OK
+            val body = response.body!!
+            body.sources.shouldBeEmpty()
+            body.answer shouldBe "Os documentos indexados não contêm informação relevante para responder a essa pergunta."
         }
 
         test("pergunta em branco retorna 400") {

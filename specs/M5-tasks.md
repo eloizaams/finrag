@@ -4,15 +4,15 @@
 
 - [x] Criar `domain/model/PageResult.kt` (genérico: `items`, `page`, `size`,
       `totalItems`, `totalPages` derivado)
-- [ ] Criar `domain/exception/DocumentNotFoundException.kt`
+- [x] Criar `domain/exception/DocumentNotFoundException.kt`
 - [x] Estender `domain/port/DocumentRepository.kt`: `findByIdAndUserId`,
       `deleteByIdAndUserId`, `findAllByUserId(userId, page, size): PageResult<Document>`
 
 ## Casos de uso
 
-- [ ] Implementar `application/GetDocumentUseCase.kt` (+ teste unitário com
+- [x] Implementar `application/GetDocumentUseCase.kt` (+ teste unitário com
       fake: encontrado, não encontrado, documento de outro usuário)
-- [ ] Implementar `application/DeleteDocumentUseCase.kt` (+ teste unitário com
+- [x] Implementar `application/DeleteDocumentUseCase.kt` (+ teste unitário com
       fake: deletado, inexistente → exceção)
 - [x] Alterar `application/ListDocumentsUseCase.kt` para receber `page`/`size`
       e retornar `PageResult<Document>` (+ atualizar teste unitário)
@@ -29,38 +29,38 @@
 - [x] Teste de integração (Testcontainers) do adapter: busca por id do dono vs
       de outro usuário, delete remove documento **e chunks** (verificar tabela
       `chunks` vazia via cascade), paginação com ordenação `created_at DESC`
-- [ ] Registrar `GetDocumentUseCase` e `DeleteDocumentUseCase` como `@Bean` em
+- [x] Registrar `GetDocumentUseCase` e `DeleteDocumentUseCase` como `@Bean` em
       `UseCaseConfig.kt`
 
 ## API
 
 - [x] Criar `api/dto/PagedResponse.kt` (mapeado de `PageResult`)
-- [ ] Adicionar `GET /documents/{id}` no `DocumentController.kt` → `200` com
+- [x] Adicionar `GET /documents/{id}` no `DocumentController.kt` → `200` com
       `DocumentResponse`
-- [ ] Adicionar `DELETE /documents/{id}` no `DocumentController.kt` → `204 No
+- [x] Adicionar `DELETE /documents/{id}` no `DocumentController.kt` → `204 No
       Content`
 - [x] Alterar `GET /documents` para `page`/`size` com defaults (`0`/`20`) e
       Bean Validation (`@Min(0)`, `@Min(1)`/`@Max(100)`) → `PagedResponse`
-- [ ] Mapear `DocumentNotFoundException` → `404 ProblemDetail` no
+- [x] Mapear `DocumentNotFoundException` → `404 ProblemDetail` no
       `DocumentExceptionHandler.kt`
 
 ## Testes de integração (Kotest + Testcontainers)
 
-- [ ] `GET /documents/{id}` com sucesso → `200` + metadados corretos
-- [ ] `GET /documents/{id}` de documento de outro usuário → `404` (mesma
+- [x] `GET /documents/{id}` com sucesso → `200` + metadados corretos
+- [x] `GET /documents/{id}` de documento de outro usuário → `404` (mesma
       resposta de inexistente)
-- [ ] `GET /documents/{id}` de documento inexistente → `404`
-- [ ] `DELETE /documents/{id}` com sucesso → `204`; documento some do
+- [x] `GET /documents/{id}` de documento inexistente → `404`
+- [x] `DELETE /documents/{id}` com sucesso → `204`; documento some do
       `GET /documents` e chunks somem do banco
-- [ ] `DELETE /documents/{id}` de documento inexistente ou de outro usuário →
+- [x] `DELETE /documents/{id}` de documento inexistente ou de outro usuário →
       `404`
-- [ ] Após o delete, `POST /questions` não usa mais os chunks removidos como
+- [x] Após o delete, `POST /questions` não usa mais os chunks removidos como
       fonte (critério 3 do requirements)
 - [x] `GET /documents` paginado com mais de uma página: tamanhos, `totalItems`,
       `totalPages` e ordenação corretos
 - [x] `GET /documents` com parâmetro inválido (`page=-1`, `size=0`,
       `size=101`) → `400` com detalhe do campo
-- [ ] Os três endpoints sem token → `401`
+- [x] Os três endpoints sem token → `401`
 
 ## Fechamento do marco
 

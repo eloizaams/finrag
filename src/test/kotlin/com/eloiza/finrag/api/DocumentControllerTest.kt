@@ -35,6 +35,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @ApplyExtension(SpringExtension::class)
@@ -107,6 +108,27 @@ class DocumentControllerTest(
 
         fun listDocuments(token: String?): List<DocumentResponse> = listDocumentsPage(token)?.items.orEmpty()
 
+        fun authHeaders(token: String?): HttpHeaders {
+            val headers = HttpHeaders()
+            token?.let { headers.setBearerAuth(it) }
+            return headers
+        }
+
+        fun getDocument(
+            token: String?,
+            id: UUID,
+        ) = restTemplate.exchange("/documents/$id", HttpMethod.GET, HttpEntity<Void>(authHeaders(token)), DocumentResponse::class.java)
+
+        fun getDocumentRaw(
+            token: String?,
+            id: UUID,
+        ) = restTemplate.exchange("/documents/$id", HttpMethod.GET, HttpEntity<Void>(authHeaders(token)), String::class.java)
+
+        fun deleteDocument(
+            token: String?,
+            id: UUID,
+        ) = restTemplate.exchange("/documents/$id", HttpMethod.DELETE, HttpEntity<Void>(authHeaders(token)), String::class.java)
+
         afterTest { fakeEmbeddingProvider.shouldFail = false }
 
         test("ingestão de PDF com sucesso retorna 201 com chunks e embeddings persistidos batendo com o chunkCount") {
@@ -172,6 +194,59 @@ class DocumentControllerTest(
 
             listDocuments(tokenA).map { it.filename } shouldBe listOf("documento-a.md")
             listDocuments(tokenB).map { it.filename } shouldBe listOf("documento-b.md")
+        }
+
+        test("GET /documents/{id} retorna 200 com os metadados do documento do usuário") {
+            val (_, token) = registerAndLogin()
+            val uploaded = upload(token, "relatorio.md", "Receita liquida de R$ 100 milhoes.".toByteArray()).body!!
+
+            val response = getDocument(token, uploaded.id)
+
+            response.statusCode shouldBe HttpStatus.OK
+            val body = response.body!!
+            body.id shouldBe uploaded.id
+            body.filename shouldBe uploaded.filename
+            body.chunkCount shouldBe uploaded.chunkCount
+            // O Postgres (TIMESTAMPTZ) arredonda para microssegundos; o POST responde com
+            // o Instant original em nanossegundos — comparar na precisão de milissegundos.
+            body.createdAt.truncatedTo(ChronoUnit.MILLIS) shouldBe uploaded.createdAt.truncatedTo(ChronoUnit.MILLIS)
+        }
+
+        test("GET /documents/{id} de documento de outro usuário ou inexistente retorna 404") {
+            val (_, tokenA) = registerAndLogin()
+            val (_, tokenB) = registerAndLogin()
+            val uploaded = upload(tokenA, "relatorio.md", "Conteudo do usuario A".toByteArray()).body!!
+
+            getDocumentRaw(tokenB, uploaded.id).statusCode shouldBe HttpStatus.NOT_FOUND
+            getDocumentRaw(tokenA, UUID.randomUUID()).statusCode shouldBe HttpStatus.NOT_FOUND
+        }
+
+        test("DELETE /documents/{id} retorna 204 e remove o documento e seus chunks do banco") {
+            val (_, token) = registerAndLogin()
+            val uploaded = upload(token, "relatorio.md", "Receita liquida de R$ 100 milhoes.".toByteArray()).body!!
+
+            val response = deleteDocument(token, uploaded.id)
+
+            response.statusCode shouldBe HttpStatus.NO_CONTENT
+            listDocuments(token).shouldBeEmpty()
+            jpaDocumentRepository.findById(uploaded.id).isPresent shouldBe false
+            jpaChunkRepository.findAll().filter { it.documentId == uploaded.id }.shouldBeEmpty()
+        }
+
+        test("DELETE /documents/{id} de documento inexistente ou de outro usuário retorna 404") {
+            val (_, tokenA) = registerAndLogin()
+            val (_, tokenB) = registerAndLogin()
+            val uploaded = upload(tokenA, "relatorio.md", "Conteudo do usuario A".toByteArray()).body!!
+
+            deleteDocument(tokenB, uploaded.id).statusCode shouldBe HttpStatus.NOT_FOUND
+            deleteDocument(tokenA, UUID.randomUUID()).statusCode shouldBe HttpStatus.NOT_FOUND
+            listDocuments(tokenA).map { it.id } shouldBe listOf(uploaded.id)
+        }
+
+        test("GET e DELETE /documents/{id} sem token retornam 401") {
+            val id = UUID.randomUUID()
+            getDocumentRaw(null, id).statusCode shouldBe HttpStatus.UNAUTHORIZED
+            deleteDocument(null, id).statusCode shouldBe HttpStatus.UNAUTHORIZED
         }
 
         test("GET /documents pagina os resultados com totalItems e totalPages corretos") {
