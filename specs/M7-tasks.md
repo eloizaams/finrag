@@ -1,0 +1,61 @@
+# M7 — Deploy — Tasks
+
+## Preparação no repositório
+
+- [ ] Ajustar `Dockerfile`: `-XX:MaxRAMPercentage=75.0` no `ENTRYPOINT`
+      (instância free tem 512MB; default da JVM limitaria o heap a 128MB)
+- [ ] Criar `render.yaml` (Blueprint): web service Docker no plano free,
+      `healthCheckPath: /actuator/health`, `autoDeploy` ligado, env vars com
+      secrets marcados `sync: false`
+- [ ] Validar que a imagem Docker local sobe e responde com o novo
+      `ENTRYPOINT` (`docker compose up` + health check)
+
+## Banco (Neon) — passos manuais da autora
+
+- [ ] Criar projeto no Neon (região AWS us-east-1), free tier
+- [ ] Confirmar `CREATE EXTENSION vector` disponível (a migration V1 cuida da
+      criação no primeiro boot)
+- [ ] Guardar connection string JDBC (`?sslmode=require`) + usuário/senha
+
+## Plataforma (Render) — passos manuais da autora
+
+- [ ] Criar o serviço via Blueprint (`render.yaml`) apontando para o repo,
+      branch `main`, plano Free
+- [ ] Preencher secrets no dashboard: `SPRING_DATASOURCE_URL`/`USERNAME`/
+      `PASSWORD` (Neon), `JWT_SECRET` **novo de produção** (32+ bytes),
+      `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
+- [ ] Configurar auto-deploy "After CI Checks Pass" na `main`
+
+## Release e CD
+
+- [ ] Abrir PR `feature/m7-deploy → develop` com os arquivos de deploy e docs
+- [ ] Após merge: abrir o PR de release `develop → main` (primeiro release)
+- [ ] Confirmar que o merge na `main` disparou o deploy no Render após o CI
+      verde
+
+## Validação pública (smoke test)
+
+- [ ] `GET /actuator/health` → `UP` na URL pública (HTTPS)
+- [ ] Swagger UI acessível na URL pública
+- [ ] Fluxo completo com APIs reais: register → login → authorize → upload →
+      pergunta com resposta e fontes
+- [ ] Rate limiting ativo (estourar o limite de perguntas → `429` +
+      `Retry-After`)
+- [ ] Migrations V1–V5 aplicadas no Neon (tabelas e extensão `vector`
+      presentes)
+- [ ] Rollback testado ou procedimento verificado no dashboard do Render
+
+## Fechamento do marco
+
+- [ ] Atualizar README: URL pública, o que testar, limitações do free tier
+      (cold start ~1 min, instância única, sem backup) e procedimento de
+      rollback
+- [ ] Marcar progresso em `00-architecture.md`/`01-roadmap.md`
+- [ ] Commit(s) semânticos ao longo do marco
+- [ ] Rodar `./gradlew build` limpo antes de cada PR
+
+## Definição de pronto (Definition of Done)
+
+Todos os critérios de aceite do `M7-requirements.md` atendidos — em especial o
+fluxo completo funcionando na URL pública com custo mensal zero — e o fluxo de
+release `develop → main → deploy` demonstrado de ponta a ponta.
