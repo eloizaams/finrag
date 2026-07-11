@@ -70,7 +70,7 @@
 - [x] Validar fluxo completo via `docker compose up`: buscar por id, deletar e
       confirmar sumiço dos chunks, listar paginado, parâmetros inválidos
 - [x] Commit(s) semânticos ao longo da implementação
-- [ ] Abrir PR de `feature/m5-gestao-documentos` para `develop`
+- [x] Abrir PR de `feature/m5-gestao-documentos` para `develop` (PR #9)
 
 ## Definição de pronto (Definition of Done)
 
