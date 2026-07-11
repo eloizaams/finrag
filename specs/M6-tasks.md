@@ -2,26 +2,26 @@
 
 ## Infraestrutura — OpenAPI/docs
 
-- [ ] Adicionar dependência `springdoc-openapi-starter-webmvc-ui:3.0.3`
-- [ ] Criar `infrastructure/openapi/OpenApiConfig.kt` (info da API + security
+- [x] Adicionar dependência `springdoc-openapi-starter-webmvc-ui:3.0.3`
+- [x] Criar `infrastructure/openapi/OpenApiConfig.kt` (info da API + security
       scheme `bearerAuth` HTTP bearer/JWT)
-- [ ] Liberar `/swagger-ui/**` e `/v3/api-docs/**` no `SecurityConfig`
+- [x] Liberar `/swagger-ui/**` e `/v3/api-docs/**` no `SecurityConfig`
 - [ ] Validar manualmente: spec em `/v3/api-docs` e UI navegável com "Authorize"
       funcionando de ponta a ponta (login → token → chamada autenticada)
 
 ## API — anotações de documentação
 
-- [ ] Anotar `AuthController` (`@Operation`, `@ApiResponses` com os erros
+- [x] Anotar `AuthController` (`@Operation`, `@ApiResponses` com os erros
       401/409/400 documentados)
-- [ ] Anotar `DocumentController` (upload multipart, listagem paginada, GET/DELETE
+- [x] Anotar `DocumentController` (upload multipart, listagem paginada, GET/DELETE
       por id com 404/400/415/422/413/429)
-- [ ] Anotar `QuestionController` (200 com fontes vazias documentado como
+- [x] Anotar `QuestionController` (200 com fontes vazias documentado como
       não-erro; 400/502/429)
-- [ ] Marcar `/auth/**` sem requisito de segurança e o restante com `bearerAuth`
+- [x] Marcar `/auth/**` sem requisito de segurança e o restante com `bearerAuth`
 
 ## Infraestrutura — rate limiting
 
-- [ ] Adicionar dependência `bucket4j_jdk17-core:8.14.0`
+- [x] Adicionar dependência `bucket4j_jdk17-core:8.14.0`
 - [ ] Criar `infrastructure/ratelimit/RateLimitProperties.kt`
       (`@ConfigurationProperties(finrag.rate-limit)`, capacity/period por rota)
 - [ ] Configurar `finrag.rate-limit.*` no `application.yaml` (defaults 10/min
@@ -39,9 +39,9 @@
 
 ## Testes de integração (Kotest + Testcontainers)
 
-- [ ] `GET /v3/api-docs` sem token → `200` e contém os paths dos endpoints
+- [x] `GET /v3/api-docs` sem token → `200` e contém os paths dos endpoints
       existentes
-- [ ] `GET /swagger-ui.html` sem token → acessível (200/redirect da UI)
+- [x] `GET /swagger-ui.html` sem token → acessível (200/redirect da UI)
 - [ ] Exceder o limite de `POST /questions` → `429` com `Retry-After` presente
       e `ProblemDetail` no corpo; requisição não chega ao provedor (fake não
       é chamado)

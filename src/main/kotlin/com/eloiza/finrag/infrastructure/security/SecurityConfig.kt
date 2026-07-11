@@ -25,8 +25,15 @@ class SecurityConfig(
                 }
             }.authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers("/auth/**", "/actuator/health", "/actuator/prometheus", "/error")
-                    .permitAll()
+                    .requestMatchers(
+                        "/auth/**",
+                        "/actuator/health",
+                        "/actuator/prometheus",
+                        "/error",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                    ).permitAll()
                     .anyRequest()
                     .authenticated()
             }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
