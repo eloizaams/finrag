@@ -1,0 +1,40 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: finrag
+      POSTGRES_USER: finrag
+      POSTGRES_PASSWORD: finrag
+    ports:
+      - "5432:5432"
+    volumes:
+      - finrag-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finrag -d finrag"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: finrag
+      DB_USER: finrag
+      DB_PASSWORD: finrag
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-me-1234567890abcdef}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      RATE_LIMIT_QUESTIONS_CAPACITY: ${RATE_LIMIT_QUESTIONS_CAPACITY:-10}
+      RATE_LIMIT_QUESTIONS_PERIOD_SECONDS: ${RATE_LIMIT_QUESTIONS_PERIOD_SECONDS:-60}
+      RATE_LIMIT_DOCUMENTS_CAPACITY: ${RATE_LIMIT_DOCUMENTS_CAPACITY:-5}
+      RATE_LIMIT_DOCUMENTS_PERIOD_SECONDS: ${RATE_LIMIT_DOCUMENTS_PERIOD_SECONDS:-60}
+    ports:
+      - "8080:8080"
+
+volumes:
+  finrag-db-data:

@@ -1,3 +1,60 @@
+# O Render injeta PORT e recomenda bindar nela (auto-detecção de porta é "best effort")
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
     name: finrag
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:finrag}
+    username: ${DB_USER:finrag}
+    password: ${DB_PASSWORD:finrag}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+  mvc:
+    problemdetails:
+      enabled: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+finrag:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+  openai:
+    api-key: ${OPENAI_API_KEY}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+    embedding-model: text-embedding-3-small
+  chunking:
+    max-chars: 1000
+    overlap-chars: 200
+  anthropic:
+    api-key: ${ANTHROPIC_API_KEY}
+    base-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}
+  rate-limit:
+    questions:
+      capacity: ${RATE_LIMIT_QUESTIONS_CAPACITY:10}
+      period-seconds: ${RATE_LIMIT_QUESTIONS_PERIOD_SECONDS:60}
+    documents:
+      capacity: ${RATE_LIMIT_DOCUMENTS_CAPACITY:5}
+      period-seconds: ${RATE_LIMIT_DOCUMENTS_PERIOD_SECONDS:60}

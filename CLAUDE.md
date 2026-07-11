@@ -28,6 +28,8 @@ Projeto de portfólio — arquitetura completa, diagrama e ADRs em `specs/00-arc
 - Build + testes: `./gradlew build`
 - Só testes: `./gradlew test`
 - Subir ambiente local: `docker compose up`
+- Rodar fora de container (ex.: via IDE): `JWT_SECRET=<32+ bytes> ./gradlew bootRun`
+  — requer o Postgres do `docker-compose.yml` já no ar
 - Health check: `GET /actuator/health`
 
 ## Convenções
@@ -41,19 +43,12 @@ Projeto de portfólio — arquitetura completa, diagrama e ADRs em `specs/00-arc
 
 ## Fluxo Git (git flow + Conventional Commits)
 
-- `main`: sempre deployável, nunca commit direto
-- `develop`: branch de integração, base de trabalho padrão
-- `feature/<slug>`: uma por marco/tarefa (ex.: `feature/m1-auth-jwt`), sai de `develop`,
-  volta para `develop`
-- `release/<versao>`: preparação de release antes do merge em `main` (opcional, ao
-  fechar um marco maior)
-- `hotfix/<slug>`: correção urgente, sai de `main`, volta para `main` e `develop`
-- Merge em `develop`/`main` sempre via PR, mesmo trabalhando sozinha — serve de
-  histórico revisável
-- Mensagens de commit em Conventional Commits: `<tipo>(<escopo opcional>): <descrição>`
-  — tipos: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `style`, `perf`, `ci`, `build`
-- Ao concluir um marco com CI verde na `develop`, merge para `main` e tag `vX.Y.Z`
-- Use a skill `commit` (`.claude/skills/commit/SKILL.md`) para gerar commits nesse padrão
+`main` (deployável, nunca commit direto) ← `release/<versao>` (opcional) ← `develop`
+(base de trabalho padrão) ← `feature/<slug>` / `hotfix/<slug>`. Merge sempre via PR,
+mesmo trabalhando sozinha. Commits em Conventional Commits.
+
+Detalhe completo do fluxo, formato de mensagem e exemplos: skill `commit`
+(`.claude/skills/commit/SKILL.md`) — é a fonte da verdade, use-a para gerar commits.
 
 ## Fora de escopo na v1 (não implementar sem alinhar antes)
 
