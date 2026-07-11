@@ -4,6 +4,7 @@ import com.eloiza.finrag.domain.exception.EmbeddingProviderException
 import com.eloiza.finrag.domain.model.Chunk
 import com.eloiza.finrag.domain.model.Document
 import com.eloiza.finrag.domain.model.DocumentType
+import com.eloiza.finrag.domain.model.PageResult
 import com.eloiza.finrag.domain.port.DocumentRepository
 import com.eloiza.finrag.domain.port.EmbeddingProvider
 import com.eloiza.finrag.domain.port.TextExtractor
@@ -42,5 +43,27 @@ class FakeDocumentRepository : DocumentRepository {
         return document
     }
 
-    override fun findAllByUserId(userId: UUID): List<Document> = documentsByUserId[userId].orEmpty()
+    override fun findAllByUserId(
+        userId: UUID,
+        page: Int,
+        size: Int,
+    ): PageResult<Document> {
+        val all = documentsByUserId[userId].orEmpty().sortedByDescending { it.createdAt }
+        return PageResult(
+            items = all.drop(page * size).take(size),
+            page = page,
+            size = size,
+            totalItems = all.size.toLong(),
+        )
+    }
+
+    override fun findByIdAndUserId(
+        id: UUID,
+        userId: UUID,
+    ): Document? = documentsByUserId[userId].orEmpty().find { it.id == id }
+
+    override fun deleteByIdAndUserId(
+        id: UUID,
+        userId: UUID,
+    ): Boolean = documentsByUserId[userId]?.removeIf { it.id == id } ?: false
 }

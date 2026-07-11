@@ -21,7 +21,7 @@ mais relevantes do(s) documento(s), com custo mínimo de operação.
 | M2 | Ingestão de documentos (PDF/Markdown → chunking → embeddings) | ✅ Concluído |
 | M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
 | M4 | Observabilidade do pipeline RAG | ✅ Concluído |
-| M5 | Gestão de documentos (GET/DELETE, paginação) | 🔜 Planejado |
+| M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
 | M6 | Docs da API + hardening | 🔜 Planejado |
 | M7 | Deploy | 🔜 Planejado |
 | M8 | Reservado / a definir | ⬜ Não alocado |

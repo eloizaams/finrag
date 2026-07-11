@@ -4,6 +4,7 @@ import com.eloiza.finrag.PostgresTestContainer
 import com.eloiza.finrag.api.dto.DocumentResponse
 import com.eloiza.finrag.api.dto.LoginRequest
 import com.eloiza.finrag.api.dto.LoginResponse
+import com.eloiza.finrag.api.dto.PagedResponse
 import com.eloiza.finrag.api.dto.RegisterRequest
 import com.eloiza.finrag.api.dto.RegisterResponse
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
@@ -26,6 +27,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -33,6 +35,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @ApplyExtension(SpringExtension::class)
@@ -87,18 +90,44 @@ class DocumentControllerTest(
             bytes: ByteArray,
         ) = restTemplate.postForEntity("/documents", uploadRequest(token, filename, bytes), String::class.java)
 
-        fun listDocuments(token: String?): List<DocumentResponse> {
+        fun listDocumentsPage(
+            token: String?,
+            query: String = "",
+        ): PagedResponse<DocumentResponse>? {
             val headers = HttpHeaders()
             token?.let { headers.setBearerAuth(it) }
             val response =
                 restTemplate.exchange(
-                    "/documents",
+                    "/documents$query",
                     HttpMethod.GET,
                     HttpEntity<Void>(headers),
-                    Array<DocumentResponse>::class.java,
+                    object : ParameterizedTypeReference<PagedResponse<DocumentResponse>>() {},
                 )
-            return response.body.orEmpty().toList()
+            return response.body
         }
+
+        fun listDocuments(token: String?): List<DocumentResponse> = listDocumentsPage(token)?.items.orEmpty()
+
+        fun authHeaders(token: String?): HttpHeaders {
+            val headers = HttpHeaders()
+            token?.let { headers.setBearerAuth(it) }
+            return headers
+        }
+
+        fun getDocument(
+            token: String?,
+            id: UUID,
+        ) = restTemplate.exchange("/documents/$id", HttpMethod.GET, HttpEntity<Void>(authHeaders(token)), DocumentResponse::class.java)
+
+        fun getDocumentRaw(
+            token: String?,
+            id: UUID,
+        ) = restTemplate.exchange("/documents/$id", HttpMethod.GET, HttpEntity<Void>(authHeaders(token)), String::class.java)
+
+        fun deleteDocument(
+            token: String?,
+            id: UUID,
+        ) = restTemplate.exchange("/documents/$id", HttpMethod.DELETE, HttpEntity<Void>(authHeaders(token)), String::class.java)
 
         afterTest { fakeEmbeddingProvider.shouldFail = false }
 
@@ -165,6 +194,86 @@ class DocumentControllerTest(
 
             listDocuments(tokenA).map { it.filename } shouldBe listOf("documento-a.md")
             listDocuments(tokenB).map { it.filename } shouldBe listOf("documento-b.md")
+        }
+
+        test("GET /documents/{id} retorna 200 com os metadados do documento do usuário") {
+            val (_, token) = registerAndLogin()
+            val uploaded = upload(token, "relatorio.md", "Receita liquida de R$ 100 milhoes.".toByteArray()).body!!
+
+            val response = getDocument(token, uploaded.id)
+
+            response.statusCode shouldBe HttpStatus.OK
+            val body = response.body!!
+            body.id shouldBe uploaded.id
+            body.filename shouldBe uploaded.filename
+            body.chunkCount shouldBe uploaded.chunkCount
+            // O Postgres (TIMESTAMPTZ) arredonda para microssegundos; o POST responde com
+            // o Instant original em nanossegundos — comparar na precisão de milissegundos.
+            body.createdAt.truncatedTo(ChronoUnit.MILLIS) shouldBe uploaded.createdAt.truncatedTo(ChronoUnit.MILLIS)
+        }
+
+        test("GET /documents/{id} de documento de outro usuário ou inexistente retorna 404") {
+            val (_, tokenA) = registerAndLogin()
+            val (_, tokenB) = registerAndLogin()
+            val uploaded = upload(tokenA, "relatorio.md", "Conteudo do usuario A".toByteArray()).body!!
+
+            getDocumentRaw(tokenB, uploaded.id).statusCode shouldBe HttpStatus.NOT_FOUND
+            getDocumentRaw(tokenA, UUID.randomUUID()).statusCode shouldBe HttpStatus.NOT_FOUND
+        }
+
+        test("DELETE /documents/{id} retorna 204 e remove o documento e seus chunks do banco") {
+            val (_, token) = registerAndLogin()
+            val uploaded = upload(token, "relatorio.md", "Receita liquida de R$ 100 milhoes.".toByteArray()).body!!
+
+            val response = deleteDocument(token, uploaded.id)
+
+            response.statusCode shouldBe HttpStatus.NO_CONTENT
+            listDocuments(token).shouldBeEmpty()
+            jpaDocumentRepository.findById(uploaded.id).isPresent shouldBe false
+            jpaChunkRepository.findAll().filter { it.documentId == uploaded.id }.shouldBeEmpty()
+        }
+
+        test("DELETE /documents/{id} de documento inexistente ou de outro usuário retorna 404") {
+            val (_, tokenA) = registerAndLogin()
+            val (_, tokenB) = registerAndLogin()
+            val uploaded = upload(tokenA, "relatorio.md", "Conteudo do usuario A".toByteArray()).body!!
+
+            deleteDocument(tokenB, uploaded.id).statusCode shouldBe HttpStatus.NOT_FOUND
+            deleteDocument(tokenA, UUID.randomUUID()).statusCode shouldBe HttpStatus.NOT_FOUND
+            listDocuments(tokenA).map { it.id } shouldBe listOf(uploaded.id)
+        }
+
+        test("GET e DELETE /documents/{id} sem token retornam 401") {
+            val id = UUID.randomUUID()
+            getDocumentRaw(null, id).statusCode shouldBe HttpStatus.UNAUTHORIZED
+            deleteDocument(null, id).statusCode shouldBe HttpStatus.UNAUTHORIZED
+        }
+
+        test("GET /documents pagina os resultados com totalItems e totalPages corretos") {
+            val (_, token) = registerAndLogin()
+            repeat(3) { index -> upload(token, "doc-$index.md", "Conteudo do documento $index".toByteArray()) }
+
+            val firstPage = listDocumentsPage(token, "?page=0&size=2")!!
+            val secondPage = listDocumentsPage(token, "?page=1&size=2")!!
+
+            firstPage.items shouldHaveSize 2
+            firstPage.totalItems shouldBe 3
+            firstPage.totalPages shouldBe 2
+            secondPage.items shouldHaveSize 1
+            (firstPage.items + secondPage.items).map { it.filename } shouldBe
+                listOf("doc-2.md", "doc-1.md", "doc-0.md")
+        }
+
+        test("GET /documents com parâmetro de paginação inválido retorna 400") {
+            val (_, token) = registerAndLogin()
+            val headers = HttpHeaders()
+            headers.setBearerAuth(token)
+
+            listOf("?page=-1", "?size=0", "?size=101").forEach { query ->
+                val response =
+                    restTemplate.exchange("/documents$query", HttpMethod.GET, HttpEntity<Void>(headers), String::class.java)
+                response.statusCode shouldBe HttpStatus.BAD_REQUEST
+            }
         }
 
         test("POST e GET /documents sem token retornam 401") {

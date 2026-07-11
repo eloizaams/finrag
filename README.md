@@ -17,7 +17,7 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 | M2 | Ingestão de documentos (PDF/Markdown → chunking → embeddings) | ✅ Concluído |
 | M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
 | M4 | Observabilidade do pipeline RAG | ✅ Concluído |
-| M5 | Gestão de documentos (GET/DELETE, paginação) | 🔜 Planejado |
+| M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
 | M6 | Docs da API + hardening | 🔜 Planejado |
 | M7 | Deploy | 🔜 Planejado |
 | M8 | Reservado / a definir | ⬜ Não alocado |
@@ -111,9 +111,30 @@ curl -X POST http://localhost:8080/documents \
   -H "Authorization: Bearer <accessToken>" \
   -F "file=@relatorio-trimestral.pdf"
 
-# listagem — só os documentos do usuário autenticado
-curl http://localhost:8080/documents \
+# listagem paginada — só os documentos do usuário autenticado, mais recentes primeiro
+# page (padrão 0) e size (padrão 20, máximo 100)
+curl "http://localhost:8080/documents?page=0&size=20" \
   -H "Authorization: Bearer <accessToken>"
+
+# busca por id — retorna 200 com { id, filename, chunkCount, createdAt }
+curl http://localhost:8080/documents/<id> \
+  -H "Authorization: Bearer <accessToken>"
+
+# remoção — retorna 204 e apaga também os chunks/embeddings do documento
+curl -X DELETE http://localhost:8080/documents/<id> \
+  -H "Authorization: Bearer <accessToken>"
+```
+
+A listagem responde no formato paginado:
+
+```json
+{
+  "items": [ { "id": "…", "filename": "relatorio.pdf", "chunkCount": 12, "createdAt": "…" } ],
+  "page": 0,
+  "size": 20,
+  "totalItems": 37,
+  "totalPages": 2
+}
 ```
 
 Erros mapeados para `ProblemDetail`:
@@ -124,6 +145,8 @@ Erros mapeados para `ProblemDetail`:
 | Arquivo vazio ou sem texto extraível          | `422`  |
 | Falha ao gerar embeddings (OpenAI)            | `502`  |
 | Arquivo maior que o limite configurado        | `413`  |
+| Documento inexistente ou de outro usuário     | `404`  |
+| Parâmetro de paginação inválido               | `400`  |
 | Sem token / token inválido                    | `401`  |
 
 ## Perguntas

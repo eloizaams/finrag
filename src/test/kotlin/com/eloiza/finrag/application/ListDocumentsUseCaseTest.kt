@@ -4,6 +4,7 @@ import com.eloiza.finrag.domain.model.Chunk
 import com.eloiza.finrag.domain.model.Document
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import java.time.Instant
 import java.util.UUID
@@ -21,13 +22,35 @@ class ListDocumentsUseCaseTest :
 
             val useCase = ListDocumentsUseCase(documentRepository)
 
-            useCase.list(userId) shouldBe listOf(ownDocument)
+            useCase.list(userId, page = 0, size = 20).items shouldBe listOf(ownDocument)
         }
 
-        test("retorna lista vazia quando o usuário não tem documentos") {
+        test("retorna página vazia quando o usuário não tem documentos") {
             val useCase = ListDocumentsUseCase(FakeDocumentRepository())
 
-            useCase.list(UUID.randomUUID()).shouldBeEmpty()
+            val result = useCase.list(UUID.randomUUID(), page = 0, size = 20)
+
+            result.items.shouldBeEmpty()
+            result.totalItems shouldBe 0
+            result.totalPages shouldBe 0
+        }
+
+        test("pagina os resultados com totalItems e totalPages corretos") {
+            val documentRepository = FakeDocumentRepository()
+            val userId = UUID.randomUUID()
+            repeat(3) {
+                val document = anyDocument(userId)
+                documentRepository.save(document, listOf(anyChunk(document.id)))
+            }
+
+            val useCase = ListDocumentsUseCase(documentRepository)
+            val firstPage = useCase.list(userId, page = 0, size = 2)
+            val secondPage = useCase.list(userId, page = 1, size = 2)
+
+            firstPage.items shouldHaveSize 2
+            firstPage.totalItems shouldBe 3
+            firstPage.totalPages shouldBe 2
+            secondPage.items shouldHaveSize 1
         }
     })
 

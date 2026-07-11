@@ -37,6 +37,8 @@ class DocumentRepositoryJpaAdapterTest(
             return UserRepositoryJpaAdapter(jpaUserRepository).save(user).id
         }
 
+        fun listAll(userId: UUID) = adapter.findAllByUserId(userId, page = 0, size = 20).items
+
         test("salva um documento com seus chunks e lê de volta, preservando o embedding") {
             val userId = persistUser()
             val document = aDocument(userId, chunkCount = 1)
@@ -44,7 +46,7 @@ class DocumentRepositoryJpaAdapterTest(
 
             adapter.save(document, listOf(chunk))
 
-            val found = adapter.findAllByUserId(userId)
+            val found = listAll(userId)
 
             found shouldContainExactly listOf(document)
             val savedChunk = jpaChunkRepository.findById(chunk.id).get()
@@ -60,7 +62,70 @@ class DocumentRepositoryJpaAdapterTest(
             adapter.save(ownDocument, listOf(aChunk(ownDocument.id, index = 0)))
             adapter.save(otherDocument, listOf(aChunk(otherDocument.id, index = 0)))
 
-            adapter.findAllByUserId(userId) shouldContainExactly listOf(ownDocument)
+            listAll(userId) shouldContainExactly listOf(ownDocument)
+        }
+
+        test("findAllByUserId pagina com totalItems correto e ordenação created_at DESC") {
+            val userId = persistUser()
+            val documents =
+                (0 until 3).map { index ->
+                    val document =
+                        aDocument(userId, chunkCount = 1)
+                            .copy(createdAt = Instant.parse("2026-07-0${index + 1}T00:00:00Z"))
+                    adapter.save(document, listOf(aChunk(document.id, index = 0)))
+                    document
+                }
+
+            val firstPage = adapter.findAllByUserId(userId, page = 0, size = 2)
+            val secondPage = adapter.findAllByUserId(userId, page = 1, size = 2)
+
+            firstPage.items shouldContainExactly listOf(documents[2], documents[1])
+            firstPage.totalItems shouldBe 3
+            firstPage.totalPages shouldBe 2
+            secondPage.items shouldContainExactly listOf(documents[0])
+        }
+
+        test("findByIdAndUserId retorna o documento quando ele pertence ao usuário") {
+            val userId = persistUser()
+            val document = aDocument(userId, chunkCount = 1)
+            adapter.save(document, listOf(aChunk(document.id, index = 0)))
+
+            adapter.findByIdAndUserId(document.id, userId) shouldBe document
+        }
+
+        test("findByIdAndUserId retorna null para documento de outro usuário e para id inexistente") {
+            val userId = persistUser()
+            val otherUserId = persistUser()
+            val document = aDocument(otherUserId, chunkCount = 1)
+            adapter.save(document, listOf(aChunk(document.id, index = 0)))
+
+            adapter.findByIdAndUserId(document.id, userId) shouldBe null
+            adapter.findByIdAndUserId(UUID.randomUUID(), userId) shouldBe null
+        }
+
+        test("deleteByIdAndUserId remove o documento e os chunks vão junto pelo ON DELETE CASCADE") {
+            val userId = persistUser()
+            val document = aDocument(userId, chunkCount = 2)
+            val chunks = listOf(aChunk(document.id, index = 0), aChunk(document.id, index = 1))
+            adapter.save(document, chunks)
+
+            val deleted = adapter.deleteByIdAndUserId(document.id, userId)
+
+            deleted shouldBe true
+            listAll(userId).shouldBeEmpty()
+            chunks.forEach { jpaChunkRepository.findById(it.id).isPresent shouldBe false }
+        }
+
+        test("deleteByIdAndUserId não remove documento de outro usuário e retorna false") {
+            val userId = persistUser()
+            val otherUserId = persistUser()
+            val document = aDocument(otherUserId, chunkCount = 1)
+            adapter.save(document, listOf(aChunk(document.id, index = 0)))
+
+            val deleted = adapter.deleteByIdAndUserId(document.id, userId)
+
+            deleted shouldBe false
+            listAll(otherUserId) shouldContainExactly listOf(document)
         }
 
         test("falha ao salvar um chunk não deixa o documento órfão no banco (rollback transacional)") {
@@ -72,7 +137,7 @@ class DocumentRepositoryJpaAdapterTest(
                 adapter.save(document, listOf(chunkComDocumentoInexistente))
             }
 
-            adapter.findAllByUserId(userId).shouldBeEmpty()
+            listAll(userId).shouldBeEmpty()
         }
     }) {
     companion object {

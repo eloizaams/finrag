@@ -1,5 +1,6 @@
 package com.eloiza.finrag.api
 
+import com.eloiza.finrag.domain.exception.DocumentNotFoundException
 import com.eloiza.finrag.domain.exception.EmptyDocumentException
 import com.eloiza.finrag.domain.exception.UnsupportedDocumentTypeException
 import org.springframework.core.Ordered
@@ -13,6 +14,10 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException
 @RestControllerAdvice(assignableTypes = [DocumentController::class])
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class DocumentExceptionHandler {
+    @ExceptionHandler(DocumentNotFoundException::class)
+    fun handleNotFound(ex: DocumentNotFoundException): ProblemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.message ?: "Documento não encontrado")
+
     @ExceptionHandler(UnsupportedDocumentTypeException::class)
     fun handleUnsupportedType(ex: UnsupportedDocumentTypeException): ProblemDetail =
         ProblemDetail.forStatusAndDetail(HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex.message ?: "Tipo de documento não suportado")

@@ -1,16 +1,15 @@
 package com.eloiza.finrag.application
 
+import com.eloiza.finrag.domain.exception.DocumentNotFoundException
 import com.eloiza.finrag.domain.model.Document
-import com.eloiza.finrag.domain.model.PageResult
 import com.eloiza.finrag.domain.port.DocumentRepository
 import java.util.UUID
 
-class ListDocumentsUseCase(
+class GetDocumentUseCase(
     private val documentRepository: DocumentRepository,
 ) {
-    fun list(
+    fun get(
         userId: UUID,
-        page: Int,
-        size: Int,
-    ): PageResult<Document> = documentRepository.findAllByUserId(userId, page, size)
+        documentId: UUID,
+    ): Document = documentRepository.findByIdAndUserId(documentId, userId) ?: throw DocumentNotFoundException()
 }
