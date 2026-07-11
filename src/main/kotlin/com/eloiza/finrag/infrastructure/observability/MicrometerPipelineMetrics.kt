@@ -4,6 +4,7 @@ import com.eloiza.finrag.domain.port.PipelineMetrics
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import org.springframework.stereotype.Component
+import java.util.function.Supplier
 
 @Component
 class MicrometerPipelineMetrics(
@@ -20,12 +21,10 @@ class MicrometerPipelineMetrics(
                 .tag(TAG_PIPELINE, pipeline)
                 .tag(TAG_STAGE, stage)
                 .register(meterRegistry)
-        val sample = Timer.start(meterRegistry)
-        try {
-            return block()
-        } finally {
-            sample.stop(timer)
-        }
+        // Timer.record registra a duração mesmo quando o bloco lança exceção;
+        // o cast só remove a anotação @Nullable da API Java (T já pode ser nulo).
+        @Suppress("UNCHECKED_CAST")
+        return timer.record(Supplier { block() }) as T
     }
 
     override fun recordTokens(
