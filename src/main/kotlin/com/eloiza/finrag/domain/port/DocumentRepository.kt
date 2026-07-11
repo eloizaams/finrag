@@ -11,4 +11,14 @@ interface DocumentRepository {
     ): Document
 
     fun findAllByUserId(userId: UUID): List<Document>
+
+    fun findByIdAndUserId(
+        id: UUID,
+        userId: UUID,
+    ): Document?
+
+    fun deleteByIdAndUserId(
+        id: UUID,
+        userId: UUID,
+    ): Boolean
 }

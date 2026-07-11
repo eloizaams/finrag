@@ -43,4 +43,14 @@ class FakeDocumentRepository : DocumentRepository {
     }
 
     override fun findAllByUserId(userId: UUID): List<Document> = documentsByUserId[userId].orEmpty()
+
+    override fun findByIdAndUserId(
+        id: UUID,
+        userId: UUID,
+    ): Document? = documentsByUserId[userId].orEmpty().find { it.id == id }
+
+    override fun deleteByIdAndUserId(
+        id: UUID,
+        userId: UUID,
+    ): Boolean = documentsByUserId[userId]?.removeIf { it.id == id } ?: false
 }

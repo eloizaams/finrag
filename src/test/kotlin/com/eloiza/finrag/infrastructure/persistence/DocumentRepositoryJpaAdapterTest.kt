@@ -63,6 +63,49 @@ class DocumentRepositoryJpaAdapterTest(
             adapter.findAllByUserId(userId) shouldContainExactly listOf(ownDocument)
         }
 
+        test("findByIdAndUserId retorna o documento quando ele pertence ao usuário") {
+            val userId = persistUser()
+            val document = aDocument(userId, chunkCount = 1)
+            adapter.save(document, listOf(aChunk(document.id, index = 0)))
+
+            adapter.findByIdAndUserId(document.id, userId) shouldBe document
+        }
+
+        test("findByIdAndUserId retorna null para documento de outro usuário e para id inexistente") {
+            val userId = persistUser()
+            val otherUserId = persistUser()
+            val document = aDocument(otherUserId, chunkCount = 1)
+            adapter.save(document, listOf(aChunk(document.id, index = 0)))
+
+            adapter.findByIdAndUserId(document.id, userId) shouldBe null
+            adapter.findByIdAndUserId(UUID.randomUUID(), userId) shouldBe null
+        }
+
+        test("deleteByIdAndUserId remove o documento e os chunks vão junto pelo ON DELETE CASCADE") {
+            val userId = persistUser()
+            val document = aDocument(userId, chunkCount = 2)
+            val chunks = listOf(aChunk(document.id, index = 0), aChunk(document.id, index = 1))
+            adapter.save(document, chunks)
+
+            val deleted = adapter.deleteByIdAndUserId(document.id, userId)
+
+            deleted shouldBe true
+            adapter.findAllByUserId(userId).shouldBeEmpty()
+            chunks.forEach { jpaChunkRepository.findById(it.id).isPresent shouldBe false }
+        }
+
+        test("deleteByIdAndUserId não remove documento de outro usuário e retorna false") {
+            val userId = persistUser()
+            val otherUserId = persistUser()
+            val document = aDocument(otherUserId, chunkCount = 1)
+            adapter.save(document, listOf(aChunk(document.id, index = 0)))
+
+            val deleted = adapter.deleteByIdAndUserId(document.id, userId)
+
+            deleted shouldBe false
+            adapter.findAllByUserId(otherUserId) shouldContainExactly listOf(document)
+        }
+
         test("falha ao salvar um chunk não deixa o documento órfão no banco (rollback transacional)") {
             val userId = persistUser()
             val document = aDocument(userId, chunkCount = 1)

@@ -24,6 +24,18 @@ class DocumentRepositoryJpaAdapter(
 
     override fun findAllByUserId(userId: UUID): List<Document> =
         jpaDocumentRepository.findAllByUserIdOrderByCreatedAtDesc(userId).map { it.toDomain() }
+
+    override fun findByIdAndUserId(
+        id: UUID,
+        userId: UUID,
+    ): Document? = jpaDocumentRepository.findByIdAndUserId(id, userId)?.toDomain()
+
+    // Os chunks são removidos pelo ON DELETE CASCADE da FK (migration V3)
+    @Transactional
+    override fun deleteByIdAndUserId(
+        id: UUID,
+        userId: UUID,
+    ): Boolean = jpaDocumentRepository.deleteByIdAndUserId(id, userId) > 0
 }
 
 private fun Document.toEntity() =
