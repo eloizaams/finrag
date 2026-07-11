@@ -4,6 +4,11 @@ API REST em Kotlin + Spring Boot com um pipeline RAG (Retrieval-Augmented Genera
 sobre documentos financeiros. Projeto de portfólio para demonstrar backend Kotlin
 aplicado a IA.
 
+**🌐 API pública:** https://finrag-p3p5.onrender.com — comece pelo
+[Swagger UI](https://finrag-p3p5.onrender.com/swagger-ui.html) (registre-se,
+faça login e use o botão *Authorize*). Free tier: a primeira requisição após
+~15 min de ociosidade pode levar **até 1 minuto** (cold start).
+
 Arquitetura completa, diagrama e ADRs em [`specs/00-architecture.md`](specs/00-architecture.md).
 O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 `requirements.md`/`design.md`/`tasks.md` em [`specs/`](specs/).
@@ -19,7 +24,7 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 | M4 | Observabilidade do pipeline RAG | ✅ Concluído |
 | M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
 | M6 | Docs da API + hardening | ✅ Concluído |
-| M7 | Deploy | 🔜 Planejado |
+| M7 | Deploy (Render + Neon, URL pública) | ✅ Concluído |
 | M8 | Reservado / a definir | ⬜ Não alocado |
 
 Roadmap completo (motivação e ordem de cada marco futuro) em
@@ -228,6 +233,27 @@ Métricas customizadas:
 | `finrag.pipeline.stage.duration` | Timer   | `pipeline=question\|ingestion`, `stage=embedding\|search\|llm\|extraction\|chunking` |
 | `finrag.llm.tokens`             | Counter | `type=prompt\|completion`          |
 | `finrag.provider.errors`        | Counter | `provider=openai\|anthropic`, `error_type=<classe da causa da falha>` |
+
+## Deploy (produção)
+
+A aplicação roda no **Render** (free tier, container buildado do `Dockerfile`
+via Blueprint `render.yaml`) com Postgres + pgvector gerenciado no **Neon**
+(free tier). Deploy contínuo: merge na `main` → CI (GitHub Actions) verde →
+Render builda e publica (`autoDeployTrigger: checksPass`), com health check em
+`/actuator/health` antes de rotear tráfego.
+
+Limitações conscientes do free tier (custo mensal zero):
+
+- **Cold start**: o serviço hiberna após 15 min sem tráfego e leva ~1 min para
+  acordar na requisição seguinte.
+- **Instância única** de 512MB (heap dimensionado via
+  `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=60.0`) — coerente com o rate
+  limiting em memória.
+- **Sem backup do banco** — os dados são recriáveis por re-ingestão.
+- O compute do Neon suspende após ~5 min ocioso e retoma em ~1s (imperceptível).
+
+**Rollback**: dashboard do Render → *Deploys* → *Rollback* no deploy anterior
+(a imagem antiga é reutilizada, sem rebuild).
 
 ## Comandos úteis
 

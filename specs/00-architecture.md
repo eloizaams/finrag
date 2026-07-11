@@ -23,7 +23,7 @@ mais relevantes do(s) documento(s), com custo mínimo de operação.
 | M4 | Observabilidade do pipeline RAG | ✅ Concluído |
 | M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
 | M6 | Docs da API + hardening | ✅ Concluído |
-| M7 | Deploy | 🔜 Planejado |
+| M7 | Deploy (Render + Neon, URL pública) | ✅ Concluído |
 | M8 | Reservado / a definir | ⬜ Não alocado |
 | M9 | Backlog opcional (multi-tenancy, re-ranking, SSE, async, golden dataset) | 💤 Backlog |
 
