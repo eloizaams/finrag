@@ -7,6 +7,7 @@ import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
@@ -42,6 +43,14 @@ class OpenApiDocsTest(
             @Suppress("UNCHECKED_CAST")
             val securitySchemes = components["securitySchemes"] as Map<String, Any>
             securitySchemes shouldContainKey "bearerAuth"
+        }
+
+        test("GET / sem token redireciona para o Swagger UI") {
+            // O TestRestTemplate segue o 302; o que chega é a página final do Swagger
+            val response = restTemplate.getForEntity("/", String::class.java)
+
+            response.statusCode shouldBe HttpStatus.OK
+            response.body!! shouldContain "swagger-ui"
         }
 
         test("GET /swagger-ui.html sem token é acessível") {
