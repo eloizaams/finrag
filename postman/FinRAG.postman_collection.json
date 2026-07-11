@@ -129,12 +129,78 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/documents",
+              "raw": "{{baseUrl}}/documents?page=0&size=20",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "documents"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar documento por id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/documents/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remover documento",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/documents/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
               ]
             }
           }
