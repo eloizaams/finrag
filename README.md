@@ -25,7 +25,7 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 | M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
 | M6 | Docs da API + hardening | ✅ Concluído |
 | M7 | Deploy (Render + Neon, URL pública) | ✅ Concluído |
-| M8 | Reservado / a definir | ⬜ Não alocado |
+| M8 | Avaliação de RAG (golden dataset, calibração de retrieval) | 🔄 Em andamento |
 
 Roadmap completo (motivação e ordem de cada marco futuro) em
 [`specs/01-roadmap.md`](specs/01-roadmap.md).

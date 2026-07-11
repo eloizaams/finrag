@@ -24,8 +24,8 @@ mais relevantes do(s) documento(s), com custo mínimo de operação.
 | M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
 | M6 | Docs da API + hardening | ✅ Concluído |
 | M7 | Deploy (Render + Neon, URL pública) | ✅ Concluído |
-| M8 | Reservado / a definir | ⬜ Não alocado |
-| M9 | Backlog opcional (multi-tenancy, re-ranking, SSE, async, golden dataset) | 💤 Backlog |
+| M8 | Avaliação de RAG (golden dataset, calibração de retrieval) | 🔄 Em andamento |
+| M9 | Backlog opcional (multi-tenancy, re-ranking, SSE, async) | 💤 Backlog |
 
 Roadmap com motivação de cada marco futuro e ordem de prioridade em
 `specs/01-roadmap.md`. Detalhe de cada marco já iniciado (critérios de

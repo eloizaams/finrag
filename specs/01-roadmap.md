@@ -16,8 +16,8 @@ fixa datas nem compromissos, só ordem de prioridade e o porquê dela.
 | M5 | Gestão de documentos | Fecha lacunas do CRUD: `GET /documents/{id}`, `DELETE /documents/{id}` (com remoção em cascata dos chunks) e paginação em `GET /documents`. Marco pequeno, mas fecha uma superfície de API incompleta | ✅ Concluído |
 | M6 | Docs da API + hardening | OpenAPI/Swagger UI para quem for testar o portfólio sem ler o código, rate limiting nos endpoints que chamam APIs pagas (embeddings/LLM), refino de validações de entrada | ✅ Concluído |
 | M7 | Deploy | Imagem Docker da aplicação e deploy em free tier (Render/Fly.io) com CI/CD, tornando o portfólio acessível por URL pública. Depende de M6 (rate limiting) para não expor custo de API sem proteção | ✅ Concluído |
-| M8 | Reservado / a definir | Sem tema concreto ainda. Reavaliar depois do M7: pode nascer de uma necessidade que só aparece rodando M4-M7 em produção (ex.: performance sob carga), ou continuar vago até então | ⬜ Não alocado |
-| M9 | Backlog opcional | Multi-tenancy real, re-ranking de busca, streaming de resposta (SSE), ingestão assíncrona, golden dataset para calibrar threshold de similaridade — já registrados como fora de escopo da v1 em `CLAUDE.md` e nos ADRs de `00-architecture.md` | 💤 Backlog |
+| M8 | Avaliação de RAG (golden dataset) | Promovido do backlog M9 após o M7: `topK`/`minSimilarity` foram escolhidos sem dados e nunca calibrados. Golden dataset + métricas de retrieval (recall@k, MRR) criam a régua de qualidade do pipeline — pré-requisito para medir o ganho de re-ranking (M9) e resposta direta à pergunta "como você sabe que o RAG funciona?". Specs no trio `M8-*.md` | 🔄 Em andamento |
+| M9 | Backlog opcional | Multi-tenancy real, re-ranking de busca, streaming de resposta (SSE), ingestão assíncrona — já registrados como fora de escopo da v1 em `CLAUDE.md` e nos ADRs de `00-architecture.md`. (O golden dataset para calibrar threshold, antes listado aqui, foi promovido a tema do M8) | 💤 Backlog |
 
 > **Por que o M9 não é "o marco depois do M8"**: o número 9 já era usado como rótulo
 > fixo do backlog opcional antes deste roadmap existir — está citado em `CLAUDE.md` e
