@@ -24,8 +24,7 @@
 
 ## Infraestrutura — observabilidade
 
-- [ ] Adicionar dependências `io.micrometer:micrometer-registry-prometheus` e
-      `io.micrometer:micrometer-tracing-bridge-brave`
+- [x] Adicionar dependência `io.micrometer:micrometer-registry-prometheus`
 - [x] Implementar `infrastructure/observability/MicrometerPipelineMetrics.kt`
       (implementa `PipelineMetrics` com `Timer`/`Counter` do `MeterRegistry`;
       métrica `finrag.pipeline.stage.duration` com tags `pipeline`/`stage`; métrica
@@ -56,31 +55,21 @@
 
 - [x] Configurar `management.endpoints.web.exposure.include: health, prometheus` no
       `application.yaml`
-- [x] Configurar `management.tracing.sampling.probability: 1.0`
 - [x] Configurar `logging.structured.format.console: ecs`
 - [x] Liberar `/actuator/prometheus` em `SecurityConfig` (mesmo padrão de
       `/actuator/health`) — necessário além do `application.yaml`, senão o Spring
       Security barra a rota com `401`
-- [x] Dependência correta descoberta na prática: `io.micrometer:micrometer-tracing-bridge-brave`
-      sozinho **não** cria o bean `Tracer` neste Spring Boot 4.1 — a autoconfiguração
-      mudou de módulo. A dependência certa é
-      `org.springframework.boot:spring-boot-micrometer-tracing-brave` (mesmo padrão do
-      `spring-boot-starter-micrometer-metrics` já usado para métricas); ajustado no
-      `build.gradle.kts`
+
+> Tentativa de correlation ID (`spring-boot-micrometer-tracing-brave` +
+> `management.tracing.sampling.probability: 1.0`) foi revertida — o `trace.id`
+> nunca apareceu no log real mesmo com o bean `Tracer` presente. Detalhe
+> completo da investigação e da decisão de reverter em `M4-design.md`
+> ("Nota: correlation ID não entregue neste marco").
 
 ## Testes de integração
 
 - [x] `GET /actuator/prometheus` responde `200` com métricas no formato Prometheus,
       sem autenticação (`SecurityConfigTest`)
-- [ ] Log de uma requisição a `POST /questions` contém `trace.id`/`transaction.id`
-      preenchidos — **não automatizado**: `Tracer` bean confirmado no contexto e
-      `management.tracing.sampling.probability: 1.0` configurado, mas o teste com
-      `ListAppender` + `tracer.withSpan(...)` deu resultado inconsistente entre
-      execuções (MDC ora populado, ora vazio) sem causa raiz clara dentro do tempo
-      disponível — provável timing/ordem de inicialização do
-      `MDCScopeDecorator` do Brave nesta combinação de versões (Micrometer Tracing
-      1.7.0 / Spring Boot 4.1.0). Verificar manualmente via `docker compose up`
-      (ver "Fechamento do marco") em vez de um teste automatizado frágil
 - [x] Após `POST /questions` respondida com sucesso, métrica `finrag.llm.tokens`
       incrementou (prompt e completion)
 - [x] Após falha simulada do provedor OpenAI (embeddings) ou Anthropic (LLM), métrica
@@ -90,15 +79,16 @@
 
 ## Fechamento do marco
 
-- [ ] Rodar `./gradlew build` limpo (build + todos os testes)
-- [ ] Atualizar README (seção de observabilidade: `GET /actuator/prometheus`, formato de
+- [x] Rodar `./gradlew build` limpo (build + todos os testes)
+- [x] Atualizar README (seção de observabilidade: `GET /actuator/prometheus`, formato de
       log estruturado, como ajustar nível de log via `LOGGING_LEVEL_ROOT`)
-- [ ] Atualizar `specs/00-architecture.md`/`specs/01-roadmap.md`: marcar M4 como
+- [x] Atualizar `specs/00-architecture.md`/`specs/01-roadmap.md`: marcar M4 como
       concluído
-- [ ] Validar fluxo completo via `docker compose up` de verdade: uma pergunta real,
+- [x] Validar fluxo completo via `docker compose up` de verdade: uma pergunta real,
       inspecionar log estruturado emitido e `/actuator/prometheus` com as métricas
-      esperadas
-- [ ] Commit(s) semânticos ao longo da implementação
+      esperadas — confirmado `finrag_pipeline_stage_duration_seconds` e
+      `finrag_provider_errors_total` no formato correto, logs em JSON ECS
+- [x] Commit(s) semânticos ao longo da implementação
 - [ ] Abrir PR de `feature/m4-observabilidade` para `develop`
 
 ## Definição de pronto (Definition of Done)

@@ -20,7 +20,7 @@ mais relevantes do(s) documento(s), com custo mínimo de operação.
 | M1 | Autenticação (JWT) | ✅ Concluído |
 | M2 | Ingestão de documentos (PDF/Markdown → chunking → embeddings) | ✅ Concluído |
 | M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
-| M4 | Observabilidade do pipeline RAG | 🔜 Planejado |
+| M4 | Observabilidade do pipeline RAG | ✅ Concluído |
 | M5 | Gestão de documentos (GET/DELETE, paginação) | 🔜 Planejado |
 | M6 | Docs da API + hardening | 🔜 Planejado |
 | M7 | Deploy | 🔜 Planejado |

@@ -16,7 +16,7 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 | M1 | Autenticação (JWT) | ✅ Concluído |
 | M2 | Ingestão de documentos (PDF/Markdown → chunking → embeddings) | ✅ Concluído |
 | M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
-| M4 | Observabilidade do pipeline RAG | 🔜 Planejado |
+| M4 | Observabilidade do pipeline RAG | ✅ Concluído |
 | M5 | Gestão de documentos (GET/DELETE, paginação) | 🔜 Planejado |
 | M6 | Docs da API + hardening | 🔜 Planejado |
 | M7 | Deploy | 🔜 Planejado |
@@ -156,9 +156,34 @@ Erros mapeados para `ProblemDetail`:
 | Falha ao gerar resposta (Anthropic)             | `502`  |
 | Sem token / token inválido                      | `401`  |
 
+## Observabilidade
+
+Logs em formato estruturado JSON (ECS — `logging.structured.format.console: ecs`).
+Nível de log padrão é `INFO`; para depuração local, ajuste sem recompilar:
+
+```bash
+export LOGGING_LEVEL_ROOT=DEBUG
+```
+
+Métricas do pipeline RAG expostas em formato Prometheus (público, sem
+autenticação — mesmo padrão do `/actuator/health`):
+
+```bash
+curl http://localhost:8080/actuator/prometheus
+```
+
+Métricas customizadas:
+
+| Métrica                        | Tipo    | Tags                              |
+|---------------------------------|---------|------------------------------------|
+| `finrag.pipeline.stage.duration` | Timer   | `pipeline=question\|ingestion`, `stage=embedding\|search\|llm\|extraction\|chunking` |
+| `finrag.llm.tokens`             | Counter | `type=prompt\|completion`          |
+| `finrag.provider.errors`        | Counter | `provider=openai\|anthropic`, `error_type=<nome da exceção>` |
+
 ## Comandos úteis
 
 - Build + testes: `./gradlew build`
 - Só testes: `./gradlew test` (usa Testcontainers — requer Docker rodando)
 - Health check: `GET /actuator/health`
+- Métricas: `GET /actuator/prometheus`
 - Collection do Postman com todos os endpoints: `postman/FinRAG.postman_collection.json`

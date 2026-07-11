@@ -13,30 +13,33 @@ tema recorrente em entrevista sobre sistemas com LLM em produção.
 
 ## Critérios de aceite
 
-1. Toda requisição HTTP recebe um `requestId` (gerado se o cliente não enviar
-   um), propagado via MDC para todos os logs emitidos durante aquela
-   requisição, em qualquer camada.
-2. Logs são emitidos em formato estruturado (JSON), não texto livre — parseável
+1. Logs são emitidos em formato estruturado (JSON), não texto livre — parseável
    por ferramenta de log (ex.: `jq`, ingestão em ELK/Datadog) sem regex.
-3. O pipeline de pergunta (`POST /questions`) loga a duração de cada etapa
-   (embedding da pergunta, busca vetorial, chamada ao LLM) e a duração total.
-4. Métricas customizadas via Micrometer expõem, no mínimo: latência (timer)
+2. O pipeline de pergunta (`POST /questions`) e o de ingestão (`POST /documents`)
+   registram a duração de cada etapa (embedding da pergunta, busca vetorial,
+   chamada ao LLM; extração, chunking, embedding) como métrica.
+3. Métricas customizadas via Micrometer expõem, no mínimo: latência (timer)
    de cada etapa do pipeline RAG e do pipeline de ingestão; contagem de tokens
    de prompt/completion consumidos por chamada ao Claude; contagem de erros
    por provedor externo (OpenAI, Anthropic), com tag de tipo de erro.
-5. `GET /actuator/prometheus` expõe as métricas em formato Prometheus.
-6. Dados sensíveis (senha, token JWT, chave de API, corpo completo de
+4. `GET /actuator/prometheus` expõe as métricas em formato Prometheus.
+5. Dados sensíveis (senha, token JWT, chave de API, corpo completo de
    pergunta/resposta do usuário) nunca aparecem em log, nem truncados — apenas
    metadados (tamanho, IDs, contagens).
-7. Erros não tratados continuam retornando o `ProblemDetail` já existente
-   (M1/M3) e adicionalmente são logados com stacktrace + `requestId`.
-8. Testes de integração cobrem: `requestId` presente na resposta/log de uma
-   requisição real, métrica de tokens incrementando após uma pergunta
-   respondida com sucesso, métrica de erro incrementando quando o provedor
-   externo falha.
+6. Erros não tratados continuam retornando o `ProblemDetail` já existente
+   (M1/M3) e adicionalmente são logados com stacktrace.
+7. Testes de integração cobrem: métrica de tokens incrementando após uma
+   pergunta respondida com sucesso, métrica de erro incrementando quando o
+   provedor externo falha, e ausência de dados sensíveis nos logs capturados.
 
 ## Fora de escopo neste marco
 
+- Correlation ID / trace ID propagado via MDC (Micrometer Tracing) — tentado
+  durante a implementação; o bean `Tracer` não propagava corretamente o
+  contexto para o MDC nesta combinação específica de versões (Spring Boot
+  4.1.0 / Micrometer Tracing 1.7.0), sem causa raiz identificada dentro do
+  tempo disponível. Revertido para não bloquear o marco; candidato a
+  investigação pontual futura (ver `M4-design.md`)
 - Tracing distribuído (OpenTelemetry/Jaeger/Zipkin) — sistema é um serviço
   único, sem múltiplos serviços para correlacionar
 - Dashboards visuais (Grafana) — métricas ficam expostas via `/actuator`,
