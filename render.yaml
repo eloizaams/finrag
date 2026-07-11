@@ -1,0 +1,30 @@
+# Blueprint do Render (specs/M7-design.md): web service free buildado do Dockerfile.
+# Deploy automático na main só depois do CI (GitHub Actions) passar.
+services:
+  - type: web
+    name: finrag
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: main
+    healthCheckPath: /actuator/health
+    autoDeployTrigger: checksPass
+    envVars:
+      # 512MB na instância free: 60% de heap deixa folga real para metaspace/threads/buffers
+      # (75%+ deixaria só ~128MB de non-heap — risco de OOM-kill sob carga)
+      - key: JAVA_TOOL_OPTIONS
+        value: "-XX:MaxRAMPercentage=60.0"
+      # Neon (connection string JDBC com ?sslmode=require) — preencher no dashboard
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      # Gerar valor novo de produção (32+ bytes) — não reutilizar o de dev
+      - key: JWT_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
