@@ -18,7 +18,7 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 | M3 | Q&A sobre documentos indexados (RAG) | ✅ Concluído |
 | M4 | Observabilidade do pipeline RAG | ✅ Concluído |
 | M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
-| M6 | Docs da API + hardening | 🔜 Planejado |
+| M6 | Docs da API + hardening | ✅ Concluído |
 | M7 | Deploy | 🔜 Planejado |
 | M8 | Reservado / a definir | ⬜ Não alocado |
 
@@ -56,6 +56,30 @@ Verifique se subiu corretamente:
 ```bash
 curl http://localhost:8080/actuator/health
 ```
+
+## Documentação interativa (Swagger UI)
+
+A API é autodocumentada via OpenAPI 3 (springdoc): a spec fica em
+`http://localhost:8080/v3/api-docs` e a UI navegável em
+`http://localhost:8080/swagger-ui.html` — ambas públicas.
+
+Para testar pela UI: `POST /auth/register` → `POST /auth/login` → copie o
+`accessToken` → botão **Authorize** → chame qualquer endpoint protegido dali
+mesmo.
+
+## Rate limiting
+
+Os endpoints que chamam APIs pagas têm limite por usuário autenticado
+(token bucket — rajadas curtas são aceitas, abuso sustentado não):
+
+| Endpoint          | Limite padrão | Env vars                                                          |
+|-------------------|---------------|--------------------------------------------------------------------|
+| `POST /questions` | 10/min        | `RATE_LIMIT_QUESTIONS_CAPACITY` / `RATE_LIMIT_QUESTIONS_PERIOD_SECONDS` |
+| `POST /documents` | 5/min         | `RATE_LIMIT_DOCUMENTS_CAPACITY` / `RATE_LIMIT_DOCUMENTS_PERIOD_SECONDS` |
+
+Exceder o limite retorna `429 Too Many Requests` (`ProblemDetail`) com o header
+`Retry-After` em segundos. Rejeições são contadas na métrica
+`finrag.ratelimit.rejections`.
 
 ### Rodando sem Docker Compose
 
@@ -147,6 +171,7 @@ Erros mapeados para `ProblemDetail`:
 | Arquivo maior que o limite configurado        | `413`  |
 | Documento inexistente ou de outro usuário     | `404`  |
 | Parâmetro de paginação inválido               | `400`  |
+| Limite de uploads por minuto excedido          | `429`  |
 | Sem token / token inválido                    | `401`  |
 
 ## Perguntas
@@ -174,9 +199,10 @@ Erros mapeados para `ProblemDetail`:
 
 | Situação                                      | Status |
 |------------------------------------------------|--------|
-| Pergunta vazia ou ausente                       | `400`  |
+| Pergunta vazia, ausente ou acima de 2000 chars  | `400`  |
 | Falha ao gerar embedding da pergunta (OpenAI)   | `502`  |
 | Falha ao gerar resposta (Anthropic)             | `502`  |
+| Limite de perguntas por minuto excedido          | `429`  |
 | Sem token / token inválido                      | `401`  |
 
 ## Observabilidade

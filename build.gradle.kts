@@ -35,6 +35,8 @@ dependencies {
     implementation("org.hibernate.orm:hibernate-vector")
     implementation("org.springframework.boot:spring-boot-restclient")
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
+    implementation("com.bucket4j:bucket4j_jdk17-core:8.14.0")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")

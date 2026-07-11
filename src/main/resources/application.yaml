@@ -47,3 +47,10 @@ finrag:
   anthropic:
     api-key: ${ANTHROPIC_API_KEY}
     base-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}
+  rate-limit:
+    questions:
+      capacity: ${RATE_LIMIT_QUESTIONS_CAPACITY:10}
+      period-seconds: ${RATE_LIMIT_QUESTIONS_PERIOD_SECONDS:60}
+    documents:
+      capacity: ${RATE_LIMIT_DOCUMENTS_CAPACITY:5}
+      period-seconds: ${RATE_LIMIT_DOCUMENTS_PERIOD_SECONDS:60}
