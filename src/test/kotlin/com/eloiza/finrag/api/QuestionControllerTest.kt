@@ -1,5 +1,8 @@
 package com.eloiza.finrag.api
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import com.eloiza.finrag.PostgresTestContainer
 import com.eloiza.finrag.api.dto.AnswerResponse
 import com.eloiza.finrag.api.dto.LoginRequest
@@ -10,6 +13,7 @@ import com.eloiza.finrag.api.dto.RegisterResponse
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
 import com.eloiza.finrag.domain.exception.LlmProviderException
 import com.eloiza.finrag.domain.model.Chunk
+import com.eloiza.finrag.domain.model.LlmResponse
 import com.eloiza.finrag.domain.port.EmbeddingProvider
 import com.eloiza.finrag.domain.port.LlmClient
 import io.kotest.core.extensions.ApplyExtension
@@ -17,6 +21,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.boot.resttestclient.TestRestTemplate
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate
 import org.springframework.boot.test.context.SpringBootTest
@@ -42,6 +47,7 @@ class QuestionControllerTest(
     restTemplate: TestRestTemplate,
     fakeEmbeddingProvider: BagOfWordsFakeEmbeddingProvider,
     fakeLlmClient: ControllableFakeLlmClient,
+    meterRegistry: MeterRegistry,
 ) : FunSpec({
 
         fun uniqueEmail() = "user-${UUID.randomUUID()}@email.com"
@@ -94,6 +100,16 @@ class QuestionControllerTest(
             question: String,
         ) = restTemplate.exchange("/questions", HttpMethod.POST, askRequest(token, question), String::class.java)
 
+        fun counterValue(
+            name: String,
+            vararg tags: String,
+        ): Double =
+            meterRegistry
+                .find(name)
+                .tags(*tags)
+                .counter()
+                ?.count() ?: 0.0
+
         afterTest {
             fakeEmbeddingProvider.shouldFail = false
             fakeLlmClient.shouldFail = false
@@ -110,6 +126,21 @@ class QuestionControllerTest(
             val body = response.body!!
             body.answer shouldBe "resposta gerada pelo LLM fake"
             body.sources.first().filename shouldBe "receita.md"
+        }
+
+        test("pergunta respondida com sucesso incrementa finrag.llm.tokens (prompt e completion)") {
+            val (_, token) = registerAndLogin()
+            uploadDocument(token, "receita.md", "A receita liquida da empresa cresceu no terceiro trimestre.")
+            val promptBefore = counterValue("finrag.llm.tokens", "type", "prompt")
+            val completionBefore = counterValue("finrag.llm.tokens", "type", "completion")
+
+            val response = ask(token, "Qual foi a receita no terceiro trimestre?")
+
+            response.statusCode shouldBe HttpStatus.OK
+            val promptAfter = counterValue("finrag.llm.tokens", "type", "prompt")
+            val completionAfter = counterValue("finrag.llm.tokens", "type", "completion")
+            promptAfter shouldBe promptBefore + 50.0
+            completionAfter shouldBe completionBefore + 10.0
         }
 
         test("isolamento por usuário: fontes de outro usuário nunca aparecem, mesmo sendo mais similares") {
@@ -155,23 +186,60 @@ class QuestionControllerTest(
             response.statusCode shouldBe HttpStatus.BAD_REQUEST
         }
 
-        test("falha do provedor de embeddings retorna 502") {
+        test("log da falha do provedor não vaza a pergunta nem o token") {
             val (_, token) = registerAndLogin()
             fakeEmbeddingProvider.shouldFail = true
+            val question = "Pergunta sigilosa que não pode aparecer no log"
+
+            val rootLogger = org.slf4j.LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+            val appender = ListAppender<ILoggingEvent>()
+            appender.start()
+            rootLogger.addAppender(appender)
+            try {
+                askRaw(token, question)
+            } finally {
+                rootLogger.detachAppender(appender)
+                appender.stop()
+            }
+
+            val providerLogEvent =
+                appender.list.firstOrNull { it.loggerName == "com.eloiza.finrag.api.ProviderExceptionHandler" }
+            (providerLogEvent != null) shouldBe true
+            appender.list.forEach { event ->
+                event.formattedMessage.contains(question) shouldBe false
+                event.formattedMessage.contains(token) shouldBe false
+                // A stacktrace também vai para o log (log.error(..., ex)): as mensagens
+                // de toda a cadeia de causas não podem vazar dados sensíveis.
+                generateSequence(event.throwableProxy) { it.cause }.forEach { proxy ->
+                    proxy.message.orEmpty().contains(question) shouldBe false
+                    proxy.message.orEmpty().contains(token) shouldBe false
+                }
+            }
+        }
+
+        test("falha do provedor de embeddings retorna 502 e incrementa finrag.provider.errors") {
+            val (_, token) = registerAndLogin()
+            fakeEmbeddingProvider.shouldFail = true
+            val before = counterValue("finrag.provider.errors", "provider", "openai", "error_type", "EmbeddingProviderException")
 
             val response = askRaw(token, "Qualquer pergunta")
 
             response.statusCode shouldBe HttpStatus.BAD_GATEWAY
+            val after = counterValue("finrag.provider.errors", "provider", "openai", "error_type", "EmbeddingProviderException")
+            after shouldBe before + 1.0
         }
 
-        test("falha do provedor de LLM retorna 502") {
+        test("falha do provedor de LLM retorna 502 e incrementa finrag.provider.errors") {
             val (_, token) = registerAndLogin()
             uploadDocument(token, "receita.md", "A receita liquida da empresa cresceu no terceiro trimestre.")
             fakeLlmClient.shouldFail = true
+            val before = counterValue("finrag.provider.errors", "provider", "anthropic", "error_type", "LlmProviderException")
 
             val response = askRaw(token, "Qual foi a receita no terceiro trimestre?")
 
             response.statusCode shouldBe HttpStatus.BAD_GATEWAY
+            val after = counterValue("finrag.provider.errors", "provider", "anthropic", "error_type", "LlmProviderException")
+            after shouldBe before + 1.0
         }
 
         test("POST /questions sem token retorna 401") {
@@ -209,7 +277,7 @@ class BagOfWordsFakeEmbeddingProvider : EmbeddingProvider {
 
     override fun embed(texts: List<String>): List<List<Float>> {
         if (shouldFail) {
-            throw EmbeddingProviderException("falha simulada do provedor de embeddings")
+            throw EmbeddingProviderException("falha simulada do provedor de embeddings", provider = "openai")
         }
         return texts.map { it.toBagOfWordsVector() }
     }
@@ -234,10 +302,10 @@ class ControllableFakeLlmClient : LlmClient {
     override fun generate(
         systemPrompt: String,
         userPrompt: String,
-    ): String {
+    ): LlmResponse {
         if (shouldFail) {
-            throw LlmProviderException("falha simulada do provedor de LLM")
+            throw LlmProviderException("falha simulada do provedor de LLM", provider = "anthropic")
         }
-        return "resposta gerada pelo LLM fake"
+        return LlmResponse(text = "resposta gerada pelo LLM fake", promptTokens = 50, completionTokens = 10)
     }
 }

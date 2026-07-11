@@ -31,12 +31,14 @@ class AskQuestionUseCaseTest :
             val chunk = scoredChunk(filename = "relatorio-q3.pdf", similarity = 0.87)
             val chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = listOf(chunk))
             val llmClient = FakeLlmClient(textToReturn = "A receita foi de R\$ 10 milhões [relatorio-q3.pdf].")
+            val pipelineMetrics = FakePipelineMetrics()
             val useCase =
                 AskQuestionUseCase(
                     embeddingProvider = FakeEmbeddingProvider(),
                     chunkSearchRepository = chunkSearchRepository,
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = llmClient,
+                    pipelineMetrics = pipelineMetrics,
                     topK = 5,
                     minSimilarity = 0.25,
                 )
@@ -47,6 +49,9 @@ class AskQuestionUseCaseTest :
             answer.sources shouldBe listOf(chunk)
             chunkSearchRepository.lastUserId shouldBe userId
             chunkSearchRepository.lastK shouldBe 5
+            pipelineMetrics.recordedStages shouldBe
+                listOf("question" to "embedding", "question" to "search", "question" to "llm")
+            pipelineMetrics.recordedTokens shouldBe (50 to 10)
         }
 
         test("busca sem resultados devolve resposta padrão sem chamar o LLM") {
@@ -57,6 +62,7 @@ class AskQuestionUseCaseTest :
                     chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = emptyList()),
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = llmClient,
+                    pipelineMetrics = FakePipelineMetrics(),
                     topK = 5,
                     minSimilarity = 0.25,
                 )
@@ -78,6 +84,7 @@ class AskQuestionUseCaseTest :
                     chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = listOf(relevant, irrelevant)),
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = llmClient,
+                    pipelineMetrics = FakePipelineMetrics(),
                     topK = 5,
                     minSimilarity = 0.25,
                 )
@@ -95,6 +102,7 @@ class AskQuestionUseCaseTest :
                     chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = listOf(scoredChunk(similarity = 0.1))),
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = llmClient,
+                    pipelineMetrics = FakePipelineMetrics(),
                     topK = 5,
                     minSimilarity = 0.25,
                 )
@@ -115,6 +123,7 @@ class AskQuestionUseCaseTest :
                     chunkSearchRepository = chunkSearchRepository,
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = llmClient,
+                    pipelineMetrics = FakePipelineMetrics(),
                     topK = 5,
                     minSimilarity = 0.25,
                 )
@@ -133,6 +142,7 @@ class AskQuestionUseCaseTest :
                     chunkSearchRepository = FakeChunkSearchRepository(chunksToReturn = listOf(scoredChunk())),
                     ragPromptBuilder = RagPromptBuilder(),
                     llmClient = FakeLlmClient(shouldFail = true),
+                    pipelineMetrics = FakePipelineMetrics(),
                     topK = 5,
                     minSimilarity = 0.25,
                 )

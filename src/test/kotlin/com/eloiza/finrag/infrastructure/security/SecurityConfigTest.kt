@@ -34,6 +34,13 @@ class SecurityConfigTest(
             response.statusCode shouldBe HttpStatus.OK
         }
 
+        test("GET /actuator/prometheus não exige autenticação e responde no formato Prometheus") {
+            val response = restTemplate.getForEntity("/actuator/prometheus", String::class.java)
+
+            response.statusCode shouldBe HttpStatus.OK
+            response.body?.contains("# HELP") shouldBe true
+        }
+
         test("rota protegida sem token retorna 401") {
             val response = restTemplate.getForEntity(protectedPath, String::class.java)
 

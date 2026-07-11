@@ -17,12 +17,14 @@ class IngestDocumentUseCaseTest :
 
         test("ingere um documento com sucesso: extrai, chunka, gera embeddings e persiste tudo de uma vez") {
             val documentRepository = FakeDocumentRepository()
+            val pipelineMetrics = FakePipelineMetrics()
             val useCase =
                 IngestDocumentUseCase(
                     textExtractor = FakeTextExtractor("Primeiro paragrafo.\n\nSegundo paragrafo."),
                     textChunker = TextChunker(maxChars = 100, overlapChars = 10),
                     embeddingProvider = FakeEmbeddingProvider(),
                     documentRepository = documentRepository,
+                    pipelineMetrics = pipelineMetrics,
                 )
 
             val document = useCase.ingest(userId, "relatorio.pdf", ByteArray(0))
@@ -32,6 +34,8 @@ class IngestDocumentUseCaseTest :
             document.chunkCount shouldBe 1
             documentRepository.saved shouldHaveSize 1
             documentRepository.saved.first().second shouldHaveSize 1
+            pipelineMetrics.recordedStages shouldBe
+                listOf("ingestion" to "extraction", "ingestion" to "chunking", "ingestion" to "embedding")
         }
 
         test("extensão não suportada lança UnsupportedDocumentTypeException e não chama o repositório") {
@@ -42,6 +46,7 @@ class IngestDocumentUseCaseTest :
                     textChunker = TextChunker(),
                     embeddingProvider = FakeEmbeddingProvider(),
                     documentRepository = documentRepository,
+                    pipelineMetrics = FakePipelineMetrics(),
                 )
 
             shouldThrow<UnsupportedDocumentTypeException> {
@@ -58,6 +63,7 @@ class IngestDocumentUseCaseTest :
                     textChunker = TextChunker(),
                     embeddingProvider = FakeEmbeddingProvider(),
                     documentRepository = documentRepository,
+                    pipelineMetrics = FakePipelineMetrics(),
                 )
 
             shouldThrow<EmptyDocumentException> {
@@ -74,6 +80,7 @@ class IngestDocumentUseCaseTest :
                     textChunker = TextChunker(),
                     embeddingProvider = FakeEmbeddingProvider(shouldFail = true),
                     documentRepository = documentRepository,
+                    pipelineMetrics = FakePipelineMetrics(),
                 )
 
             shouldThrow<EmbeddingProviderException> {

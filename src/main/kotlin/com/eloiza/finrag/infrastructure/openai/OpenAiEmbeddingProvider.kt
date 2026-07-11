@@ -28,11 +28,12 @@ class OpenAiEmbeddingProvider(
                     .body(EmbeddingRequest(model = properties.embeddingModel, input = texts))
                     .retrieve()
                     .body<EmbeddingResponse>()
-                    ?: throw EmbeddingProviderException("Resposta vazia da API de embeddings da OpenAI")
+                    ?: throw EmbeddingProviderException("Resposta vazia da API de embeddings da OpenAI", provider = PROVIDER)
 
             if (response.data.size != texts.size) {
                 throw EmbeddingProviderException(
                     "OpenAI retornou ${response.data.size} embeddings para ${texts.size} textos enviados",
+                    provider = PROVIDER,
                 )
             }
 
@@ -41,17 +42,19 @@ class OpenAiEmbeddingProvider(
                 if (embedding.size != Chunk.EMBEDDING_DIMENSIONS) {
                     throw EmbeddingProviderException(
                         "OpenAI retornou embedding com ${embedding.size} dimensões, esperado ${Chunk.EMBEDDING_DIMENSIONS}",
+                        provider = PROVIDER,
                     )
                 }
             }
 
             return embeddings
         } catch (e: RestClientException) {
-            throw EmbeddingProviderException("Falha ao chamar a API de embeddings da OpenAI", e)
+            throw EmbeddingProviderException("Falha ao chamar a API de embeddings da OpenAI", e, PROVIDER)
         }
     }
 
     private companion object {
+        const val PROVIDER = "openai"
         const val MAX_BATCH_SIZE = 2048
     }
 }

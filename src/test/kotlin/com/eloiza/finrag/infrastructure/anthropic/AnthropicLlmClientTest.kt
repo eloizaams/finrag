@@ -37,7 +37,10 @@ class AnthropicLlmClientTest :
             val (client, server) = buildClient()
             val responseJson =
                 """
-                { "content": [ { "type": "text", "text": "A receita foi de R${'$'} 10 milhões." } ] }
+                {
+                  "content": [ { "type": "text", "text": "A receita foi de R${'$'} 10 milhões." } ],
+                  "usage": { "input_tokens": 120, "output_tokens": 15 }
+                }
                 """.trimIndent()
 
             server
@@ -53,10 +56,26 @@ class AnthropicLlmClientTest :
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON))
 
-            val text = client.generate("responda com base no contexto", "Qual foi a receita?")
+            val response = client.generate("responda com base no contexto", "Qual foi a receita?")
 
-            text shouldBe "A receita foi de R\$ 10 milhões."
+            response.text shouldBe "A receita foi de R\$ 10 milhões."
+            response.promptTokens shouldBe 120
+            response.completionTokens shouldBe 15
             server.verify()
+        }
+
+        test("resposta sem campo usage devolve contagem de tokens zerada") {
+            val (client, server) = buildClient()
+            val responseJson = """{ "content": [ { "type": "text", "text": "Resposta sem usage" } ] }"""
+
+            server
+                .expect(requestTo("https://api.anthropic.test/v1/messages"))
+                .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON))
+
+            val response = client.generate("system", "pergunta")
+
+            response.promptTokens shouldBe 0
+            response.completionTokens shouldBe 0
         }
 
         test("erro HTTP da Anthropic lança LlmProviderException") {
@@ -95,6 +114,6 @@ class AnthropicLlmClientTest :
                 .expect(requestTo("https://api.anthropic.test/v1/messages"))
                 .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON))
 
-            client.generate("system", "pergunta") shouldBe "Resposta cortada no meio"
+            client.generate("system", "pergunta").text shouldBe "Resposta cortada no meio"
         }
     })
