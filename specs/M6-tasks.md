@@ -65,7 +65,7 @@
       authorize + chamada autenticada, estourar limite de perguntas (429 +
       Retry-After), pergunta gigante (400)
 - [x] Commit(s) semânticos ao longo da implementação
-- [ ] Abrir PR de `feature/m6-docs-hardening` para `develop`
+- [x] Abrir PR de `feature/m6-docs-hardening` para `develop` (PR #10)
 
 ## Definição de pronto (Definition of Done)
 
