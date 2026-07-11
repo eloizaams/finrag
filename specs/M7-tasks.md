@@ -15,47 +15,47 @@
 
 ## Banco (Neon) — passos manuais da autora
 
-- [ ] Criar projeto no Neon (região AWS us-east-1), free tier
-- [ ] Confirmar `CREATE EXTENSION vector` disponível (a migration V1 cuida da
+- [x] Criar projeto no Neon (região AWS us-east-1), free tier
+- [x] Confirmar `CREATE EXTENSION vector` disponível (a migration V1 cuida da
       criação no primeiro boot)
-- [ ] Guardar connection string JDBC (`?sslmode=require`) + usuário/senha
+- [x] Guardar connection string JDBC (`?sslmode=require`) + usuário/senha
 
 ## Plataforma (Render) — passos manuais da autora
 
-- [ ] Criar o serviço via Blueprint (`render.yaml`) apontando para o repo,
+- [x] Criar o serviço via Blueprint (`render.yaml`) apontando para o repo,
       branch `main`, plano Free
-- [ ] Preencher secrets no dashboard: `SPRING_DATASOURCE_URL`/`USERNAME`/
+- [x] Preencher secrets no dashboard: `SPRING_DATASOURCE_URL`/`USERNAME`/
       `PASSWORD` (Neon), `JWT_SECRET` **novo de produção** (32+ bytes),
       `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
-- [ ] Configurar auto-deploy "After CI Checks Pass" na `main`
+- [x] Configurar auto-deploy "After CI Checks Pass" na `main`
 
 ## Release e CD
 
-- [ ] Abrir PR `feature/m7-deploy → develop` com os arquivos de deploy e docs
-- [ ] Após merge: abrir o PR de release `develop → main` (primeiro release)
-- [ ] Confirmar que o merge na `main` disparou o deploy no Render após o CI
+- [x] Abrir PR `feature/m7-deploy → develop` com os arquivos de deploy e docs
+- [x] Após merge: abrir o PR de release `develop → main` (primeiro release)
+- [x] Confirmar que o merge na `main` disparou o deploy no Render após o CI
       verde
 
 ## Validação pública (smoke test)
 
-- [ ] `GET /actuator/health` → `UP` na URL pública (HTTPS)
-- [ ] Swagger UI acessível na URL pública
-- [ ] Fluxo completo com APIs reais: register → login → authorize → upload →
+- [x] `GET /actuator/health` → `UP` na URL pública (HTTPS)
+- [x] Swagger UI acessível na URL pública
+- [x] Fluxo completo com APIs reais: register → login → authorize → upload →
       pergunta com resposta e fontes
-- [ ] Rate limiting ativo (estourar o limite de perguntas → `429` +
+- [x] Rate limiting ativo (estourar o limite de perguntas → `429` +
       `Retry-After`)
-- [ ] Migrations V1–V5 aplicadas no Neon (tabelas e extensão `vector`
+- [x] Migrations V1–V5 aplicadas no Neon (tabelas e extensão `vector`
       presentes)
 - [ ] Rollback testado ou procedimento verificado no dashboard do Render
 
 ## Fechamento do marco
 
-- [ ] Atualizar README: URL pública, o que testar, limitações do free tier
+- [x] Atualizar README: URL pública, o que testar, limitações do free tier
       (cold start ~1 min, instância única, sem backup) e procedimento de
       rollback
-- [ ] Marcar progresso em `00-architecture.md`/`01-roadmap.md`
-- [ ] Commit(s) semânticos ao longo do marco
-- [ ] Rodar `./gradlew build` limpo antes de cada PR
+- [x] Marcar progresso em `00-architecture.md`/`01-roadmap.md`
+- [x] Commit(s) semânticos ao longo do marco
+- [x] Rodar `./gradlew build` limpo antes de cada PR
 
 ## Definição de pronto (Definition of Done)
 
