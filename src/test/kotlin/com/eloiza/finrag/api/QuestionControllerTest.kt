@@ -1,5 +1,8 @@
 package com.eloiza.finrag.api
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import com.eloiza.finrag.PostgresTestContainer
 import com.eloiza.finrag.api.dto.AnswerResponse
 import com.eloiza.finrag.api.dto.LoginRequest
@@ -171,6 +174,32 @@ class QuestionControllerTest(
             val response = askRaw(token, "   ")
 
             response.statusCode shouldBe HttpStatus.BAD_REQUEST
+        }
+
+        test("log da falha do provedor não vaza a pergunta nem o token") {
+            val (_, token) = registerAndLogin()
+            fakeEmbeddingProvider.shouldFail = true
+            val question = "Pergunta sigilosa que não pode aparecer no log"
+
+            val rootLogger = org.slf4j.LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
+            val appender = ListAppender<ILoggingEvent>()
+            appender.start()
+            rootLogger.addAppender(appender)
+            try {
+                askRaw(token, question)
+            } finally {
+                rootLogger.detachAppender(appender)
+                appender.stop()
+            }
+
+            val providerLogEvent =
+                appender.list.firstOrNull { it.loggerName == "com.eloiza.finrag.api.ProviderExceptionHandler" }
+            (providerLogEvent != null) shouldBe true
+            appender.list.forEach { event ->
+                event.formattedMessage.contains(question) shouldBe false
+                event.formattedMessage.contains(token) shouldBe false
+            }
+            fakeEmbeddingProvider.shouldFail = false
         }
 
         test("falha do provedor de embeddings retorna 502 e incrementa finrag.provider.errors") {

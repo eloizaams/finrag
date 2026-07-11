@@ -25,7 +25,7 @@ class SecurityConfig(
                 }
             }.authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers("/auth/**", "/actuator/health", "/error")
+                    .requestMatchers("/auth/**", "/actuator/health", "/actuator/prometheus", "/error")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
