@@ -48,8 +48,7 @@ class UseCaseConfig {
         embeddingProvider: EmbeddingProvider,
         documentRepository: DocumentRepository,
         pipelineMetrics: PipelineMetrics,
-    ): IngestDocumentUseCase =
-        IngestDocumentUseCase(textExtractor, textChunker, embeddingProvider, documentRepository, pipelineMetrics)
+    ): IngestDocumentUseCase = IngestDocumentUseCase(textExtractor, textChunker, embeddingProvider, documentRepository, pipelineMetrics)
 
     @Bean
     fun listDocumentsUseCase(documentRepository: DocumentRepository): ListDocumentsUseCase = ListDocumentsUseCase(documentRepository)

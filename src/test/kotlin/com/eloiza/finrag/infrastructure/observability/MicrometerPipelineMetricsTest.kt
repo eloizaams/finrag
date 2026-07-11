@@ -35,7 +35,15 @@ class MicrometerPipelineMetricsTest :
 
             metrics.recordTokens(promptTokens = 120, completionTokens = 15)
 
-            registry.find("finrag.llm.tokens").tags("type", "prompt").counter()?.count() shouldBe 120.0
-            registry.find("finrag.llm.tokens").tags("type", "completion").counter()?.count() shouldBe 15.0
+            registry
+                .find("finrag.llm.tokens")
+                .tags("type", "prompt")
+                .counter()
+                ?.count() shouldBe 120.0
+            registry
+                .find("finrag.llm.tokens")
+                .tags("type", "completion")
+                .counter()
+                ?.count() shouldBe 15.0
         }
     })

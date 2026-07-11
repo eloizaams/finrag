@@ -121,14 +121,34 @@ class QuestionControllerTest(
         test("pergunta respondida com sucesso incrementa finrag.llm.tokens (prompt e completion)") {
             val (_, token) = registerAndLogin()
             uploadDocument(token, "receita.md", "A receita liquida da empresa cresceu no terceiro trimestre.")
-            val promptBefore = meterRegistry.find("finrag.llm.tokens").tags("type", "prompt").counter()?.count() ?: 0.0
-            val completionBefore = meterRegistry.find("finrag.llm.tokens").tags("type", "completion").counter()?.count() ?: 0.0
+            val promptBefore =
+                meterRegistry
+                    .find("finrag.llm.tokens")
+                    .tags("type", "prompt")
+                    .counter()
+                    ?.count() ?: 0.0
+            val completionBefore =
+                meterRegistry
+                    .find("finrag.llm.tokens")
+                    .tags("type", "completion")
+                    .counter()
+                    ?.count() ?: 0.0
 
             val response = ask(token, "Qual foi a receita no terceiro trimestre?")
 
             response.statusCode shouldBe HttpStatus.OK
-            val promptAfter = meterRegistry.find("finrag.llm.tokens").tags("type", "prompt").counter()?.count() ?: 0.0
-            val completionAfter = meterRegistry.find("finrag.llm.tokens").tags("type", "completion").counter()?.count() ?: 0.0
+            val promptAfter =
+                meterRegistry
+                    .find("finrag.llm.tokens")
+                    .tags("type", "prompt")
+                    .counter()
+                    ?.count() ?: 0.0
+            val completionAfter =
+                meterRegistry
+                    .find("finrag.llm.tokens")
+                    .tags("type", "completion")
+                    .counter()
+                    ?.count() ?: 0.0
             promptAfter shouldBe promptBefore + 50.0
             completionAfter shouldBe completionBefore + 10.0
         }
