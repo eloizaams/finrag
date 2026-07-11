@@ -23,7 +23,7 @@ class FakeEmbeddingProvider(
 ) : EmbeddingProvider {
     override fun embed(texts: List<String>): List<List<Float>> {
         if (shouldFail) {
-            throw EmbeddingProviderException("falha simulada do provedor de embeddings")
+            throw EmbeddingProviderException("falha simulada do provedor de embeddings", provider = "openai")
         }
         return texts.map { text -> List(Chunk.EMBEDDING_DIMENSIONS) { text.length.toFloat() } }
     }

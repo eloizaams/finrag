@@ -18,14 +18,14 @@ class ProviderExceptionHandler(
     @ExceptionHandler(EmbeddingProviderException::class)
     fun handleEmbeddingProvider(ex: EmbeddingProviderException): ProblemDetail {
         log.error("Falha ao gerar embeddings via provedor externo: {}", ex.message, ex)
-        recordProviderError(PROVIDER_OPENAI, ex)
+        recordProviderError(ex.provider, ex)
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, "Falha ao gerar embeddings")
     }
 
     @ExceptionHandler(LlmProviderException::class)
     fun handleLlmProvider(ex: LlmProviderException): ProblemDetail {
         log.error("Falha ao gerar resposta via provedor de LLM: {}", ex.message, ex)
-        recordProviderError(PROVIDER_ANTHROPIC, ex)
+        recordProviderError(ex.provider, ex)
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, "Falha ao gerar resposta")
     }
 
@@ -33,13 +33,16 @@ class ProviderExceptionHandler(
         provider: String,
         ex: Exception,
     ) {
+        // A causa distingue o tipo real da falha (timeout, erro HTTP, ...); a própria
+        // exceção de domínio é sempre a mesma por provedor e serve só de fallback.
+        val errorType = (ex.cause ?: ex)::class.simpleName ?: "Unknown"
         meterRegistry
             .counter(
                 PROVIDER_ERRORS_METRIC,
                 TAG_PROVIDER,
                 provider,
                 TAG_ERROR_TYPE,
-                ex::class.simpleName ?: "Unknown",
+                errorType,
             ).increment()
     }
 
@@ -47,7 +50,5 @@ class ProviderExceptionHandler(
         const val PROVIDER_ERRORS_METRIC = "finrag.provider.errors"
         const val TAG_PROVIDER = "provider"
         const val TAG_ERROR_TYPE = "error_type"
-        const val PROVIDER_OPENAI = "openai"
-        const val PROVIDER_ANTHROPIC = "anthropic"
     }
 }

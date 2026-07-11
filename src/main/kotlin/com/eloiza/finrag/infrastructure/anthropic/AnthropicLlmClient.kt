@@ -38,11 +38,11 @@ class AnthropicLlmClient(
                         ),
                     ).retrieve()
                     .body<MessageResponse>()
-                    ?: throw LlmProviderException("Resposta vazia da API de mensagens da Anthropic")
+                    ?: throw LlmProviderException("Resposta vazia da API de mensagens da Anthropic", provider = PROVIDER)
 
             val text = response.content.firstOrNull { it.type == "text" }?.text
             if (text.isNullOrBlank()) {
-                throw LlmProviderException("Anthropic não retornou nenhum bloco de texto na resposta")
+                throw LlmProviderException("Anthropic não retornou nenhum bloco de texto na resposta", provider = PROVIDER)
             }
             if (response.stopReason == STOP_REASON_MAX_TOKENS) {
                 log.warn(
@@ -56,11 +56,12 @@ class AnthropicLlmClient(
                 completionTokens = response.usage?.outputTokens ?: 0,
             )
         } catch (e: RestClientException) {
-            throw LlmProviderException("Falha ao chamar a API de mensagens da Anthropic", e)
+            throw LlmProviderException("Falha ao chamar a API de mensagens da Anthropic", e, PROVIDER)
         }
     }
 
     private companion object {
+        const val PROVIDER = "anthropic"
         const val API_KEY_HEADER = "x-api-key"
         const val VERSION_HEADER = "anthropic-version"
         const val VERSION = "2023-06-01"

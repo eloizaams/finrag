@@ -41,7 +41,7 @@ class FakeLlmClient(
     ): LlmResponse {
         called = true
         if (shouldFail) {
-            throw LlmProviderException("falha simulada do provedor de LLM")
+            throw LlmProviderException("falha simulada do provedor de LLM", provider = "anthropic")
         }
         return LlmResponse(text = textToReturn, promptTokens = promptTokens, completionTokens = completionTokens)
     }

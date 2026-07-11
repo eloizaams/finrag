@@ -45,7 +45,7 @@
 ## API
 
 - [x] Atualizar `api/ProviderExceptionHandler.kt`: incrementar `finrag.provider.errors`
-      (tags `provider=openai|anthropic`, `error_type=<nome da exceção>`) ao tratar
+      (tags `provider=openai|anthropic`, `error_type=<classe da causa da falha>`) ao tratar
       `EmbeddingProviderException`/`LlmProviderException`
 - [x] Teste cobrindo o incremento do contador de erro ao simular falha de cada provedor
       (em `QuestionControllerTest`, que já simulava as duas falhas) — também aproveitado

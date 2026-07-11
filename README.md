@@ -178,7 +178,7 @@ Métricas customizadas:
 |---------------------------------|---------|------------------------------------|
 | `finrag.pipeline.stage.duration` | Timer   | `pipeline=question\|ingestion`, `stage=embedding\|search\|llm\|extraction\|chunking` |
 | `finrag.llm.tokens`             | Counter | `type=prompt\|completion`          |
-| `finrag.provider.errors`        | Counter | `provider=openai\|anthropic`, `error_type=<nome da exceção>` |
+| `finrag.provider.errors`        | Counter | `provider=openai\|anthropic`, `error_type=<classe da causa da falha>` |
 
 ## Comandos úteis
 

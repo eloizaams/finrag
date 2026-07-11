@@ -100,6 +100,16 @@ class QuestionControllerTest(
             question: String,
         ) = restTemplate.exchange("/questions", HttpMethod.POST, askRequest(token, question), String::class.java)
 
+        fun counterValue(
+            name: String,
+            vararg tags: String,
+        ): Double =
+            meterRegistry
+                .find(name)
+                .tags(*tags)
+                .counter()
+                ?.count() ?: 0.0
+
         afterTest {
             fakeEmbeddingProvider.shouldFail = false
             fakeLlmClient.shouldFail = false
@@ -121,34 +131,14 @@ class QuestionControllerTest(
         test("pergunta respondida com sucesso incrementa finrag.llm.tokens (prompt e completion)") {
             val (_, token) = registerAndLogin()
             uploadDocument(token, "receita.md", "A receita liquida da empresa cresceu no terceiro trimestre.")
-            val promptBefore =
-                meterRegistry
-                    .find("finrag.llm.tokens")
-                    .tags("type", "prompt")
-                    .counter()
-                    ?.count() ?: 0.0
-            val completionBefore =
-                meterRegistry
-                    .find("finrag.llm.tokens")
-                    .tags("type", "completion")
-                    .counter()
-                    ?.count() ?: 0.0
+            val promptBefore = counterValue("finrag.llm.tokens", "type", "prompt")
+            val completionBefore = counterValue("finrag.llm.tokens", "type", "completion")
 
             val response = ask(token, "Qual foi a receita no terceiro trimestre?")
 
             response.statusCode shouldBe HttpStatus.OK
-            val promptAfter =
-                meterRegistry
-                    .find("finrag.llm.tokens")
-                    .tags("type", "prompt")
-                    .counter()
-                    ?.count() ?: 0.0
-            val completionAfter =
-                meterRegistry
-                    .find("finrag.llm.tokens")
-                    .tags("type", "completion")
-                    .counter()
-                    ?.count() ?: 0.0
+            val promptAfter = counterValue("finrag.llm.tokens", "type", "prompt")
+            val completionAfter = counterValue("finrag.llm.tokens", "type", "completion")
             promptAfter shouldBe promptBefore + 50.0
             completionAfter shouldBe completionBefore + 10.0
         }
@@ -218,29 +208,24 @@ class QuestionControllerTest(
             appender.list.forEach { event ->
                 event.formattedMessage.contains(question) shouldBe false
                 event.formattedMessage.contains(token) shouldBe false
+                // A stacktrace também vai para o log (log.error(..., ex)): as mensagens
+                // de toda a cadeia de causas não podem vazar dados sensíveis.
+                generateSequence(event.throwableProxy) { it.cause }.forEach { proxy ->
+                    proxy.message.orEmpty().contains(question) shouldBe false
+                    proxy.message.orEmpty().contains(token) shouldBe false
+                }
             }
-            fakeEmbeddingProvider.shouldFail = false
         }
 
         test("falha do provedor de embeddings retorna 502 e incrementa finrag.provider.errors") {
             val (_, token) = registerAndLogin()
             fakeEmbeddingProvider.shouldFail = true
-            val before =
-                meterRegistry
-                    .find("finrag.provider.errors")
-                    .tags("provider", "openai", "error_type", "EmbeddingProviderException")
-                    .counter()
-                    ?.count() ?: 0.0
+            val before = counterValue("finrag.provider.errors", "provider", "openai", "error_type", "EmbeddingProviderException")
 
             val response = askRaw(token, "Qualquer pergunta")
 
             response.statusCode shouldBe HttpStatus.BAD_GATEWAY
-            val after =
-                meterRegistry
-                    .find("finrag.provider.errors")
-                    .tags("provider", "openai", "error_type", "EmbeddingProviderException")
-                    .counter()
-                    ?.count() ?: 0.0
+            val after = counterValue("finrag.provider.errors", "provider", "openai", "error_type", "EmbeddingProviderException")
             after shouldBe before + 1.0
         }
 
@@ -248,22 +233,12 @@ class QuestionControllerTest(
             val (_, token) = registerAndLogin()
             uploadDocument(token, "receita.md", "A receita liquida da empresa cresceu no terceiro trimestre.")
             fakeLlmClient.shouldFail = true
-            val before =
-                meterRegistry
-                    .find("finrag.provider.errors")
-                    .tags("provider", "anthropic", "error_type", "LlmProviderException")
-                    .counter()
-                    ?.count() ?: 0.0
+            val before = counterValue("finrag.provider.errors", "provider", "anthropic", "error_type", "LlmProviderException")
 
             val response = askRaw(token, "Qual foi a receita no terceiro trimestre?")
 
             response.statusCode shouldBe HttpStatus.BAD_GATEWAY
-            val after =
-                meterRegistry
-                    .find("finrag.provider.errors")
-                    .tags("provider", "anthropic", "error_type", "LlmProviderException")
-                    .counter()
-                    ?.count() ?: 0.0
+            val after = counterValue("finrag.provider.errors", "provider", "anthropic", "error_type", "LlmProviderException")
             after shouldBe before + 1.0
         }
 
@@ -302,7 +277,7 @@ class BagOfWordsFakeEmbeddingProvider : EmbeddingProvider {
 
     override fun embed(texts: List<String>): List<List<Float>> {
         if (shouldFail) {
-            throw EmbeddingProviderException("falha simulada do provedor de embeddings")
+            throw EmbeddingProviderException("falha simulada do provedor de embeddings", provider = "openai")
         }
         return texts.map { it.toBagOfWordsVector() }
     }
@@ -329,7 +304,7 @@ class ControllableFakeLlmClient : LlmClient {
         userPrompt: String,
     ): LlmResponse {
         if (shouldFail) {
-            throw LlmProviderException("falha simulada do provedor de LLM")
+            throw LlmProviderException("falha simulada do provedor de LLM", provider = "anthropic")
         }
         return LlmResponse(text = "resposta gerada pelo LLM fake", promptTokens = 50, completionTokens = 10)
     }
