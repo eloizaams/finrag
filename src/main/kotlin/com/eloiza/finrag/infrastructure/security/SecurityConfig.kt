@@ -29,6 +29,7 @@ class SecurityConfig(
             }.authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers(
+                        "/",
                         "/auth/**",
                         "/actuator/health",
                         "/actuator/prometheus",
