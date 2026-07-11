@@ -13,7 +13,7 @@ fixa datas nem compromissos, só ordem de prioridade e o porquê dela.
 | Marco | Tema | Motivação | Status |
 |-------|------|-----------|--------|
 | M4 | Observabilidade do pipeline RAG | Logs estruturados JSON e métricas (Micrometer/Actuator) já aparecem no diagrama de `00-architecture.md`, mas nenhum marco entregou isso. Sem instrumentação, não dá para responder "quanto custa uma pergunta" ou "onde está a latência" — pergunta óbvia de entrevista sobre sistemas com LLM | ✅ Concluído |
-| M5 | Gestão de documentos | Fecha lacunas do CRUD: `GET /documents/{id}`, `DELETE /documents/{id}` (com remoção em cascata dos chunks) e paginação em `GET /documents`. Marco pequeno, mas fecha uma superfície de API incompleta | 🔜 Planejado |
+| M5 | Gestão de documentos | Fecha lacunas do CRUD: `GET /documents/{id}`, `DELETE /documents/{id}` (com remoção em cascata dos chunks) e paginação em `GET /documents`. Marco pequeno, mas fecha uma superfície de API incompleta | ✅ Concluído |
 | M6 | Docs da API + hardening | OpenAPI/Swagger UI para quem for testar o portfólio sem ler o código, rate limiting nos endpoints que chamam APIs pagas (embeddings/LLM), refino de validações de entrada | 🔜 Planejado |
 | M7 | Deploy | Imagem Docker da aplicação e deploy em free tier (Render/Fly.io) com CI/CD, tornando o portfólio acessível por URL pública. Depende de M6 (rate limiting) para não expor custo de API sem proteção | 🔜 Planejado |
 | M8 | Reservado / a definir | Sem tema concreto ainda. Reavaliar depois do M7: pode nascer de uma necessidade que só aparece rodando M4-M7 em produção (ex.: performance sob carga), ou continuar vago até então | ⬜ Não alocado |

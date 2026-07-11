@@ -64,12 +64,12 @@
 
 ## Fechamento do marco
 
-- [ ] Rodar `./gradlew build` limpo (build + todos os testes)
-- [ ] Atualizar README (novos endpoints com exemplos de `curl`, formato da
+- [x] Rodar `./gradlew build` limpo (build + todos os testes)
+- [x] Atualizar README (novos endpoints com exemplos de `curl`, formato da
       resposta paginada) e marcar progresso em `00-architecture.md`/`01-roadmap.md`
-- [ ] Validar fluxo completo via `docker compose up`: buscar por id, deletar e
+- [x] Validar fluxo completo via `docker compose up`: buscar por id, deletar e
       confirmar sumiço dos chunks, listar paginado, parâmetros inválidos
-- [ ] Commit(s) semânticos ao longo da implementação
+- [x] Commit(s) semânticos ao longo da implementação
 - [ ] Abrir PR de `feature/m5-gestao-documentos` para `develop`
 
 ## Definição de pronto (Definition of Done)
