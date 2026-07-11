@@ -1,8 +1,11 @@
 package com.eloiza.finrag.api
 
 import com.eloiza.finrag.api.dto.DocumentResponse
+import com.eloiza.finrag.api.dto.PagedResponse
 import com.eloiza.finrag.application.IngestDocumentUseCase
 import com.eloiza.finrag.application.ListDocumentsUseCase
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -35,5 +38,11 @@ class DocumentController(
     @GetMapping
     fun list(
         @AuthenticationPrincipal userId: UUID,
-    ): List<DocumentResponse> = listDocumentsUseCase.list(userId).map(DocumentResponse::from)
+        @RequestParam(defaultValue = "0") @Min(0) page: Int,
+        @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) size: Int,
+    ): PagedResponse<DocumentResponse> = PagedResponse.from(listDocumentsUseCase.list(userId, page, size), DocumentResponse::from)
+
+    companion object {
+        const val MAX_PAGE_SIZE = 100L
+    }
 }

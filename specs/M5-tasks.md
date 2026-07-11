@@ -2,10 +2,10 @@
 
 ## Domínio e portas
 
-- [ ] Criar `domain/model/PageResult.kt` (genérico: `items`, `page`, `size`,
+- [x] Criar `domain/model/PageResult.kt` (genérico: `items`, `page`, `size`,
       `totalItems`, `totalPages` derivado)
 - [ ] Criar `domain/exception/DocumentNotFoundException.kt`
-- [ ] Estender `domain/port/DocumentRepository.kt`: `findByIdAndUserId`,
+- [x] Estender `domain/port/DocumentRepository.kt`: `findByIdAndUserId`,
       `deleteByIdAndUserId`, `findAllByUserId(userId, page, size): PageResult<Document>`
 
 ## Casos de uso
@@ -14,19 +14,19 @@
       fake: encontrado, não encontrado, documento de outro usuário)
 - [ ] Implementar `application/DeleteDocumentUseCase.kt` (+ teste unitário com
       fake: deletado, inexistente → exceção)
-- [ ] Alterar `application/ListDocumentsUseCase.kt` para receber `page`/`size`
+- [x] Alterar `application/ListDocumentsUseCase.kt` para receber `page`/`size`
       e retornar `PageResult<Document>` (+ atualizar teste unitário)
-- [ ] Atualizar `FakeDocumentAdapters.kt` com os métodos novos da porta
+- [x] Atualizar `FakeDocumentAdapters.kt` com os métodos novos da porta
 
 ## Infraestrutura — persistência
 
-- [ ] Estender `JpaDocumentRepository.kt`:
+- [x] Estender `JpaDocumentRepository.kt`:
       `findAllByUserIdOrderByCreatedAtDesc(userId, Pageable)` e
       `deleteByIdAndUserId(id, userId)` (derived delete retornando contagem)
-- [ ] Implementar os métodos novos em `DocumentRepositoryJpaAdapter.kt`
+- [x] Implementar os métodos novos em `DocumentRepositoryJpaAdapter.kt`
       (conversão `Page<DocumentEntity>` → `PageResult<Document>`;
       `@Transactional` no delete)
-- [ ] Teste de integração (Testcontainers) do adapter: busca por id do dono vs
+- [x] Teste de integração (Testcontainers) do adapter: busca por id do dono vs
       de outro usuário, delete remove documento **e chunks** (verificar tabela
       `chunks` vazia via cascade), paginação com ordenação `created_at DESC`
 - [ ] Registrar `GetDocumentUseCase` e `DeleteDocumentUseCase` como `@Bean` em
@@ -34,12 +34,12 @@
 
 ## API
 
-- [ ] Criar `api/dto/PagedResponse.kt` (mapeado de `PageResult`)
+- [x] Criar `api/dto/PagedResponse.kt` (mapeado de `PageResult`)
 - [ ] Adicionar `GET /documents/{id}` no `DocumentController.kt` → `200` com
       `DocumentResponse`
 - [ ] Adicionar `DELETE /documents/{id}` no `DocumentController.kt` → `204 No
       Content`
-- [ ] Alterar `GET /documents` para `page`/`size` com defaults (`0`/`20`) e
+- [x] Alterar `GET /documents` para `page`/`size` com defaults (`0`/`20`) e
       Bean Validation (`@Min(0)`, `@Min(1)`/`@Max(100)`) → `PagedResponse`
 - [ ] Mapear `DocumentNotFoundException` → `404 ProblemDetail` no
       `DocumentExceptionHandler.kt`
@@ -56,9 +56,9 @@
       `404`
 - [ ] Após o delete, `POST /questions` não usa mais os chunks removidos como
       fonte (critério 3 do requirements)
-- [ ] `GET /documents` paginado com mais de uma página: tamanhos, `totalItems`,
+- [x] `GET /documents` paginado com mais de uma página: tamanhos, `totalItems`,
       `totalPages` e ordenação corretos
-- [ ] `GET /documents` com parâmetro inválido (`page=-1`, `size=0`,
+- [x] `GET /documents` com parâmetro inválido (`page=-1`, `size=0`,
       `size=101`) → `400` com detalhe do campo
 - [ ] Os três endpoints sem token → `401`
 

@@ -2,7 +2,9 @@ package com.eloiza.finrag.infrastructure.persistence
 
 import com.eloiza.finrag.domain.model.Chunk
 import com.eloiza.finrag.domain.model.Document
+import com.eloiza.finrag.domain.model.PageResult
 import com.eloiza.finrag.domain.port.DocumentRepository
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -22,8 +24,19 @@ class DocumentRepositoryJpaAdapter(
         return document
     }
 
-    override fun findAllByUserId(userId: UUID): List<Document> =
-        jpaDocumentRepository.findAllByUserIdOrderByCreatedAtDesc(userId).map { it.toDomain() }
+    override fun findAllByUserId(
+        userId: UUID,
+        page: Int,
+        size: Int,
+    ): PageResult<Document> {
+        val result = jpaDocumentRepository.findAllByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size))
+        return PageResult(
+            items = result.content.map { it.toDomain() },
+            page = page,
+            size = size,
+            totalItems = result.totalElements,
+        )
+    }
 
     override fun findByIdAndUserId(
         id: UUID,

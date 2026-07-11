@@ -4,6 +4,7 @@ import com.eloiza.finrag.PostgresTestContainer
 import com.eloiza.finrag.api.dto.DocumentResponse
 import com.eloiza.finrag.api.dto.LoginRequest
 import com.eloiza.finrag.api.dto.LoginResponse
+import com.eloiza.finrag.api.dto.PagedResponse
 import com.eloiza.finrag.api.dto.RegisterRequest
 import com.eloiza.finrag.api.dto.RegisterResponse
 import com.eloiza.finrag.domain.exception.EmbeddingProviderException
@@ -26,6 +27,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -87,18 +89,23 @@ class DocumentControllerTest(
             bytes: ByteArray,
         ) = restTemplate.postForEntity("/documents", uploadRequest(token, filename, bytes), String::class.java)
 
-        fun listDocuments(token: String?): List<DocumentResponse> {
+        fun listDocumentsPage(
+            token: String?,
+            query: String = "",
+        ): PagedResponse<DocumentResponse>? {
             val headers = HttpHeaders()
             token?.let { headers.setBearerAuth(it) }
             val response =
                 restTemplate.exchange(
-                    "/documents",
+                    "/documents$query",
                     HttpMethod.GET,
                     HttpEntity<Void>(headers),
-                    Array<DocumentResponse>::class.java,
+                    object : ParameterizedTypeReference<PagedResponse<DocumentResponse>>() {},
                 )
-            return response.body.orEmpty().toList()
+            return response.body
         }
+
+        fun listDocuments(token: String?): List<DocumentResponse> = listDocumentsPage(token)?.items.orEmpty()
 
         afterTest { fakeEmbeddingProvider.shouldFail = false }
 
@@ -165,6 +172,33 @@ class DocumentControllerTest(
 
             listDocuments(tokenA).map { it.filename } shouldBe listOf("documento-a.md")
             listDocuments(tokenB).map { it.filename } shouldBe listOf("documento-b.md")
+        }
+
+        test("GET /documents pagina os resultados com totalItems e totalPages corretos") {
+            val (_, token) = registerAndLogin()
+            repeat(3) { index -> upload(token, "doc-$index.md", "Conteudo do documento $index".toByteArray()) }
+
+            val firstPage = listDocumentsPage(token, "?page=0&size=2")!!
+            val secondPage = listDocumentsPage(token, "?page=1&size=2")!!
+
+            firstPage.items shouldHaveSize 2
+            firstPage.totalItems shouldBe 3
+            firstPage.totalPages shouldBe 2
+            secondPage.items shouldHaveSize 1
+            (firstPage.items + secondPage.items).map { it.filename } shouldBe
+                listOf("doc-2.md", "doc-1.md", "doc-0.md")
+        }
+
+        test("GET /documents com parâmetro de paginação inválido retorna 400") {
+            val (_, token) = registerAndLogin()
+            val headers = HttpHeaders()
+            headers.setBearerAuth(token)
+
+            listOf("?page=-1", "?size=0", "?size=101").forEach { query ->
+                val response =
+                    restTemplate.exchange("/documents$query", HttpMethod.GET, HttpEntity<Void>(headers), String::class.java)
+                response.statusCode shouldBe HttpStatus.BAD_REQUEST
+            }
         }
 
         test("POST e GET /documents sem token retornam 401") {
