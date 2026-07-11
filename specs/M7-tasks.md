@@ -2,11 +2,14 @@
 
 ## Preparação no repositório
 
-- [x] Ajustar `Dockerfile`: `-XX:MaxRAMPercentage=75.0` no `ENTRYPOINT`
-      (instância free tem 512MB; default da JVM limitaria o heap a 128MB)
+- [x] Dimensionar a JVM para os 512MB da instância free:
+      `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=60.0` via `envVars` do
+      render.yaml (ENTRYPOINT genérico — ajustado após code review)
+- [x] Bindar na porta injetada pelo Render: `server.port: ${PORT:8080}` no
+      `application.yaml` (ajustado após code review)
 - [x] Criar `render.yaml` (Blueprint): web service Docker no plano free,
-      `healthCheckPath: /actuator/health`, `autoDeploy` ligado, env vars com
-      secrets marcados `sync: false`
+      `healthCheckPath: /actuator/health`, `autoDeployTrigger: checksPass`,
+      env vars com secrets marcados `sync: false`
 - [x] Validar que a imagem Docker local sobe e responde com o novo
       `ENTRYPOINT` (`docker compose up` + health check)
 

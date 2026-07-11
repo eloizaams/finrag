@@ -15,5 +15,5 @@ RUN addgroup -S finrag && adduser -S finrag -G finrag
 COPY --from=build --chown=finrag:finrag /app/build/libs/*.jar app.jar
 USER finrag
 EXPOSE 8080
-# 512MB no free tier do Render: o default container-aware da JVM daria só 25% (128MB) de heap
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+# Tuning de memória por ambiente via JAVA_TOOL_OPTIONS (ver render.yaml para produção)
+ENTRYPOINT ["java", "-jar", "app.jar"]

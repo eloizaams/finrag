@@ -1,3 +1,7 @@
+# O Render injeta PORT e recomenda bindar nela (auto-detecção de porta é "best effort")
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
     name: finrag

@@ -10,7 +10,8 @@
 | CD | Auto-deploy nativo do Render na `main`, com **"After CI Checks Pass"** | Merge na `main` só vira deploy depois do GitHub Actions verde — o gate de testes continua sendo o CI existente, sem pipeline novo para manter |
 | Infra como config | `render.yaml` (Blueprint) versionado no repo | Declara serviço, runtime Docker, health check e env vars (secrets com `sync: false`) — reproduzível e visível no portfólio, sem precisar de Terraform |
 | Build | Render builda direto do `Dockerfile` | O multi-stage do M0 já produz imagem enxuta (JRE alpine, non-root). Publicar em registry (GHCR) só adicionaria uma etapa sem ganho aqui |
-| Memória da JVM | `-XX:MaxRAMPercentage=75.0` no `ENTRYPOINT` | A instância free tem 512MB; o default container-aware da JVM limita o heap a 25% (128MB) — apertado para Spring Boot. 75% (~384MB) deixa folga para metaspace/threads sem estourar o container |
+| Memória da JVM | `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=60.0` via `envVars` do render.yaml (ENTRYPOINT fica genérico) | A instância free tem 512MB; o default container-aware da JVM limita o heap a 25% (128MB) — apertado para Spring Boot. 60% (~307MB) sobe o heap deixando ~200MB reais para metaspace/threads/buffers (75% deixaria só ~128MB — risco de OOM-kill). Na env var da plataforma, e não no Dockerfile, porque o valor é calibrado para ESTE ambiente: a mesma imagem roda no compose local (sem limite de memória) e em alvos futuros |
+| Porta HTTP | `server.port: ${PORT:8080}` no application.yaml | O Render injeta `PORT` e a doc trata a auto-detecção de porta como "usually able to detect", recomendando bindar na `PORT` como caminho confiável. Localmente nada muda (default 8080) |
 | Health check | `/actuator/health` como `healthCheckPath` do Render | Já público desde o M0; o Render o usa para considerar o deploy saudável antes de rotear tráfego |
 | Primeiro release | PR direto `develop → main` | Branch `release/1.0` não agrega em projeto solo com CI obrigatória — o fluxo do CLAUDE.md a trata como opcional. Releases seguintes repetem o mesmo PR quando houver algo a publicar |
 | Cold start | Aceitar e documentar no README | Spin-down após 15 min ociosos, ~1 min para acordar. Nota honesta gerencia a expectativa de quem testa; ping externo para manter quente contraria o espírito do free tier e adiciona dependência frágil |
@@ -20,15 +21,17 @@
 ## O que muda no repositório
 
 ```
-Dockerfile          # (alterado) ENTRYPOINT com -XX:MaxRAMPercentage=75.0
 render.yaml         # (novo) Blueprint: web service Docker, plano free,
-                    #   healthCheckPath /actuator/health, autoDeploy on,
-                    #   env vars (secrets com sync: false)
+                    #   healthCheckPath /actuator/health, autoDeployTrigger
+                    #   checksPass, JAVA_TOOL_OPTIONS (memória) e secrets
+                    #   com sync: false
+application.yaml    # (alterado) server.port: ${PORT:8080} — binda na PORT
+                    #   injetada pelo Render
 README.md           # (alterado) seção "Deploy / URL pública": endereço, o que
                     #   testar, limitações do free tier, rollback
 ```
 
-Nenhuma mudança em `src/` — o marco é de infraestrutura/processo.
+Fora isso, nenhuma mudança em `src/` — o marco é de infraestrutura/processo.
 
 ## Runbook do primeiro deploy (passos manuais, executados pela autora)
 

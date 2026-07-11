@@ -10,6 +10,10 @@ services:
     healthCheckPath: /actuator/health
     autoDeployTrigger: checksPass
     envVars:
+      # 512MB na instância free: 60% de heap deixa folga real para metaspace/threads/buffers
+      # (75%+ deixaria só ~128MB de non-heap — risco de OOM-kill sob carga)
+      - key: JAVA_TOOL_OPTIONS
+        value: "-XX:MaxRAMPercentage=60.0"
       # Neon (connection string JDBC com ?sslmode=require) — preencher no dashboard
       - key: SPRING_DATASOURCE_URL
         sync: false
