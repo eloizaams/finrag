@@ -46,7 +46,7 @@
       `Retry-After`)
 - [x] Migrations V1–V5 aplicadas no Neon (tabelas e extensão `vector`
       presentes)
-- [ ] Rollback testado ou procedimento verificado no dashboard do Render
+- [x] Rollback testado ou procedimento verificado no dashboard do Render
 
 ## Fechamento do marco
 
