@@ -22,35 +22,35 @@
 ## Infraestrutura — rate limiting
 
 - [x] Adicionar dependência `bucket4j_jdk17-core:8.14.0`
-- [ ] Criar `infrastructure/ratelimit/RateLimitProperties.kt`
+- [x] Criar `infrastructure/ratelimit/RateLimitProperties.kt`
       (`@ConfigurationProperties(finrag.rate-limit)`, capacity/period por rota)
-- [ ] Configurar `finrag.rate-limit.*` no `application.yaml` (defaults 10/min
+- [x] Configurar `finrag.rate-limit.*` no `application.yaml` (defaults 10/min
       perguntas, 5/min uploads, sobrescrevíveis por env var)
-- [ ] Implementar `infrastructure/ratelimit/RateLimitFilter.kt` (token bucket
+- [x] Implementar `infrastructure/ratelimit/RateLimitFilter.kt` (token bucket
       por `userId`+rota via `ConcurrentHashMap`, 429 `ProblemDetail` +
       `Retry-After`, counter `finrag.ratelimit.rejections{endpoint}`)
-- [ ] Registrar o filtro após o `JwtAuthenticationFilter` no `SecurityConfig`
-- [ ] Teste unitário do filtro/buckets com relógio controlado (`TimeMeter`
+- [x] Registrar o filtro após o `JwtAuthenticationFilter` no `SecurityConfig`
+- [x] Teste unitário do filtro/buckets com relógio controlado (`TimeMeter`
       custom): consome até estourar, refill devolve tokens, chaves isoladas
 
 ## Validações de entrada
 
-- [ ] `@Size(max = 2000)` na `QuestionRequest` (+ mensagem clara no 400)
+- [x] `@Size(max = 2000)` na `QuestionRequest` (+ mensagem clara no 400)
 
 ## Testes de integração (Kotest + Testcontainers)
 
 - [x] `GET /v3/api-docs` sem token → `200` e contém os paths dos endpoints
       existentes
 - [x] `GET /swagger-ui.html` sem token → acessível (200/redirect da UI)
-- [ ] Exceder o limite de `POST /questions` → `429` com `Retry-After` presente
+- [x] Exceder o limite de `POST /questions` → `429` com `Retry-After` presente
       e `ProblemDetail` no corpo; requisição não chega ao provedor (fake não
       é chamado)
-- [ ] Limite de um usuário não afeta outro (isolamento por `userId`)
-- [ ] Após o período de refill, o usuário volta a ser atendido (usar limite
+- [x] Limite de um usuário não afeta outro (isolamento por `userId`)
+- [x] Após o período de refill, o usuário volta a ser atendido (usar limite
       curto via propriedade de teste)
-- [ ] Exceder o limite de `POST /documents` → `429`
-- [ ] `429` incrementa `finrag.ratelimit.rejections`
-- [ ] Pergunta acima de 2000 caracteres → `400` com detalhe do campo, sem
+- [x] Exceder o limite de `POST /documents` → `429`
+- [x] `429` incrementa `finrag.ratelimit.rejections`
+- [x] Pergunta acima de 2000 caracteres → `400` com detalhe do campo, sem
       chamar o provedor de embeddings
 - [ ] Rotas públicas (`/actuator/health`, `/actuator/prometheus`) seguem `200`
       sem token (não regressão)

@@ -1,6 +1,8 @@
 package com.eloiza.finrag.infrastructure.security
 
+import com.eloiza.finrag.infrastructure.ratelimit.RateLimitFilter
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -13,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val rateLimitFilter: RateLimitFilter,
 ) {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -37,7 +40,15 @@ class SecurityConfig(
                     .anyRequest()
                     .authenticated()
             }.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            // Depois do filtro JWT: o rate limit usa o userId autenticado como chave
+            .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter::class.java)
 
         return http.build()
     }
+
+    // O filtro só pode rodar dentro da cadeia do Security (precisa do SecurityContext);
+    // sem isto o Boot o registraria também na cadeia do servlet, antes da autenticação.
+    @Bean
+    fun rateLimitFilterRegistration(filter: RateLimitFilter): FilterRegistrationBean<RateLimitFilter> =
+        FilterRegistrationBean(filter).apply { isEnabled = false }
 }
