@@ -89,7 +89,7 @@
       esperadas — confirmado `finrag_pipeline_stage_duration_seconds` e
       `finrag_provider_errors_total` no formato correto, logs em JSON ECS
 - [x] Commit(s) semânticos ao longo da implementação
-- [ ] Abrir PR de `feature/m4-observabilidade` para `develop`
+- [x] Abrir PR de `feature/m4-observabilidade` para `develop` (PR #8)
 
 ## Definição de pronto (Definition of Done)
 
