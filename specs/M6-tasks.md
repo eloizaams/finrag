@@ -6,7 +6,7 @@
 - [x] Criar `infrastructure/openapi/OpenApiConfig.kt` (info da API + security
       scheme `bearerAuth` HTTP bearer/JWT)
 - [x] Liberar `/swagger-ui/**` e `/v3/api-docs/**` no `SecurityConfig`
-- [ ] Validar manualmente: spec em `/v3/api-docs` e UI navegável com "Authorize"
+- [x] Validar manualmente: spec em `/v3/api-docs` e UI navegável com "Authorize"
       funcionando de ponta a ponta (login → token → chamada autenticada)
 
 ## API — anotações de documentação
@@ -52,19 +52,19 @@
 - [x] `429` incrementa `finrag.ratelimit.rejections`
 - [x] Pergunta acima de 2000 caracteres → `400` com detalhe do campo, sem
       chamar o provedor de embeddings
-- [ ] Rotas públicas (`/actuator/health`, `/actuator/prometheus`) seguem `200`
+- [x] Rotas públicas (`/actuator/health`, `/actuator/prometheus`) seguem `200`
       sem token (não regressão)
 
 ## Fechamento do marco
 
-- [ ] Rodar `./gradlew build` limpo (build + todos os testes)
-- [ ] Atualizar README (seção de docs da API com link do Swagger UI, seção de
+- [x] Rodar `./gradlew build` limpo (build + todos os testes)
+- [x] Atualizar README (seção de docs da API com link do Swagger UI, seção de
       rate limiting com limites e env vars) e progresso em
       `00-architecture.md`/`01-roadmap.md`
-- [ ] Validar fluxo completo via `docker compose up`: Swagger UI no browser,
+- [x] Validar fluxo completo via `docker compose up`: Swagger UI no browser,
       authorize + chamada autenticada, estourar limite de perguntas (429 +
       Retry-After), pergunta gigante (400)
-- [ ] Commit(s) semânticos ao longo da implementação
+- [x] Commit(s) semânticos ao longo da implementação
 - [ ] Abrir PR de `feature/m6-docs-hardening` para `develop`
 
 ## Definição de pronto (Definition of Done)
