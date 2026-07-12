@@ -12,44 +12,47 @@
 
 ## Corpus e golden dataset
 
-- [ ] Escrever 2–3 documentos financeiros fictícios em Markdown em
+- [x] Escrever 2–3 documentos financeiros fictícios em Markdown em
       `src/test/resources/golden/corpus/` — ricos o bastante para 15–25
       perguntas, com temas que se sobreponham parcialmente entre documentos
-- [ ] Definir o schema do caso em `golden-dataset.json` (pergunta, documento
+- [x] Definir o schema do caso em `golden-dataset.json` (pergunta, documento
       esperado, substrings esperadas, tem-resposta?, resposta de referência)
-- [ ] Escrever os 15–25 casos: perguntas **parafraseadas** (nunca frase literal
+- [x] Escrever os 15–25 casos: perguntas **parafraseadas** (nunca frase literal
       do documento), ≥ 1 caso multi-chunk, ≥ 2 casos sem resposta no corpus,
       ≥ 2 casos ambíguos entre documentos
-- [ ] Revisar as substrings-âncora: curtas (3–6 palavras), no miolo de
-      parágrafo, únicas no corpus
+- [x] Revisar as substrings-âncora: curtas (3–6 palavras), no miolo de
+      parágrafo, únicas no corpus (validadas por script: presentes e únicas)
 
 ## Harness (src/test/kotlin/com/eloiza/finrag/eval/)
 
-- [ ] `GoldenCase.kt` + `GoldenDatasetLoader.kt`: carregar e validar o JSON
-      (falha clara se malformado ou substring duplicada)
-- [ ] `RetrievalMetrics.kt`: recall@k e MRR por caso; agregação por combinação
+- [x] `GoldenCase.kt` + `GoldenDatasetLoader.kt`: carregar e validar o JSON
+      (falha clara se malformado ou substring duplicada) — com
+      `GoldenDatasetLoaderTest` rodando no build normal como guarda de
+      consistência dataset↔corpus no CI
+- [x] `RetrievalMetrics.kt`: recall@k e MRR por caso; agregação por combinação
       do grid `topK × minSimilarity`; regra dos casos sem resposta (acerto =
       nenhum score acima do threshold)
-- [ ] Teste unitário de `RetrievalMetrics` com resultados sintéticos (roda no
+- [x] Teste unitário de `RetrievalMetrics` com resultados sintéticos (roda no
       build normal, sem tag — a lógica de métrica é código como outro qualquer)
-- [ ] `RagRetrievalEvalSpec.kt` com `@Tags("RagEval")`: sobe contexto +
+- [x] `RagRetrievalEvalSpec.kt` com `@Tags("RagEval")`: sobe contexto +
       Testcontainers, cria usuário sintético, ingere o corpus via
       `IngestDocumentUseCase`, embeda perguntas, busca top-10 via
       `ChunkSearchRepository`, computa o grid em memória
-- [ ] `RagEvalReportWriter.kt`: resumo no console + markdown em
+- [x] `RagEvalReportWriter.kt`: resumo no console + markdown em
       `build/reports/rag-eval/report.md` (tabela do grid, casos que falharam
       com os chunks retornados no lugar)
-- [ ] Spec não falha por métrica baixa; falha por erro de execução (chave
+- [x] Spec não falha por métrica baixa; falha por erro de execução (chave
       ausente, dataset inválido)
 
 ## Build (build.gradle.kts)
 
-- [ ] `tasks.test`: excluir a tag (`kotest.tags = !RagEval`)
-- [ ] Task `ragEval` (tipo `Test`): incluir só a tag, sobrescrever a
+- [x] `tasks.test`: excluir a tag (`kotest.tags = !RagEval`)
+- [x] Task `ragEval` (tipo `Test`): incluir só a tag, sobrescrever a
       `OPENAI_API_KEY` fake do `withType<Test>` com a real do ambiente, e
       falhar rápido com mensagem clara se não estiver definida
-- [ ] Confirmar: `./gradlew build` verde **sem** nenhuma chamada externa e sem
-      executar a spec de avaliação
+- [x] Confirmar: `./gradlew build` verde **sem** nenhuma chamada externa e sem
+      executar a spec de avaliação (spec ausente dos test-results; ragEval sem
+      chave falha rápido com a mensagem esperada)
 
 ## Calibração
 
