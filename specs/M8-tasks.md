@@ -82,9 +82,9 @@
       não-determinismo; registrado no roadmap e no ADR-07)
 - [x] Marcar progresso em `00-architecture.md`/`01-roadmap.md`
 - [x] Commits semânticos ao longo do marco; `./gradlew build` limpo antes do PR
-- [ ] PR `feature/m8-avaliacao-rag → develop` (**#19, aberto**); release
-      `develop → main` ao final (o harness não roda no CI — nada muda no
-      deploy)
+- [x] PR `feature/m8-avaliacao-rag → develop` (#19, mergeado); release
+      `develop → main` (#20, mergeado — deploy no Render disparado; sem
+      mudança em `src/main`, rebuild da mesma aplicação)
 
 ## Definição de pronto (Definition of Done)
 

@@ -116,6 +116,9 @@ tocar no core.
 | ADR-06 | Clean Architecture com 4 camadas | Arquitetura em camadas tradicional (controller-service-repository) | Isola regras de negócio de frameworks e provedores externos; facilita testes unitários sem Testcontainers |
 | ADR-07 | Avaliação de RAG com golden dataset próprio, só de retrieval | Frameworks prontos (Ragas, promptfoo); LLM-as-judge da resposta gerada | Retrieval é determinístico, barato (~US$ 0,0001/rodada) e é o teto da qualidade — a resposta nunca é melhor que o contexto que chega ao prompt. Dataset pequeno (25 casos) implementado na mão, coerente com ADR-04; achado central: nenhum threshold de similaridade separa "tem resposta" de "não tem" (faixas 0,46–0,76 vs 0,55–0,71 se sobrepõem), então a recusa pertence ao prompt do LLM. LLM-as-judge ficou no backlog (M9) por custo e não-determinismo. Resultados em `docs/rag-eval.md` |
 
+Defesa de cada ADR em formato de entrevista (pergunta provável, resposta modelo
+e trade-off admitido) em `docs/adr-defesa.md`.
+
 ## Restrições do projeto
 
 - Custo de operação próximo de zero (free tier de LLM/embeddings, sem infra paga além do necessário)
