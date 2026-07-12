@@ -85,7 +85,7 @@ class RagRetrievalEvalSpec(
 
             val report = File(REPORT_PATH)
             report.parentFile.mkdirs()
-            report.writeText(RagEvalReportWriter.markdownReport(summaries, production))
+            report.writeText(RagEvalReportWriter.markdownReport(summaries, production, cases, retrievalsByCaseId))
             println(RagEvalReportWriter.consoleSummary(summaries, production))
 
             report.shouldExist()

@@ -21,7 +21,8 @@ data class GridCombination(
  *
  * - Caso com resposta: [hit] = toda substring esperada apareceu em algum chunk
  *   retido (documento certo + substring, com espaços normalizados);
- *   [firstHitRank] = posição (1-based) do primeiro chunk relevante.
+ *   [firstHitRank]/[firstHitSimilarity] = posição (1-based) e score do
+ *   primeiro chunk relevante — o score alimenta a análise de threshold.
  * - Caso sem resposta: [hit] = nenhum chunk sobrou acima do threshold — a
  *   recusa era o comportamento correto; [firstHitRank] não se aplica.
  *
@@ -33,6 +34,7 @@ data class CaseEvaluation(
     val hasAnswer: Boolean,
     val hit: Boolean,
     val firstHitRank: Int?,
+    val firstHitSimilarity: Double?,
     val retained: List<RetrievedChunk>,
 )
 
@@ -97,6 +99,7 @@ object RetrievalMetrics {
                 hasAnswer = false,
                 hit = retained.isEmpty(),
                 firstHitRank = null,
+                firstHitSimilarity = null,
                 retained = retained,
             )
         }
@@ -106,11 +109,13 @@ object RetrievalMetrics {
                 firstMatchRank(retained, case.expectedDocument!!, substring)
             }
         val hit = ranksBySubstring.all { it != null }
+        val firstHitRank = ranksBySubstring.filterNotNull().minOrNull()
         return CaseEvaluation(
             caseId = case.id,
             hasAnswer = true,
             hit = hit,
-            firstHitRank = ranksBySubstring.filterNotNull().minOrNull(),
+            firstHitRank = firstHitRank,
+            firstHitSimilarity = firstHitRank?.let { retained[it - 1].similarity },
             retained = retained,
         )
     }

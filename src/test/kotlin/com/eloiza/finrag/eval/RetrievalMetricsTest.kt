@@ -50,6 +50,7 @@ class RetrievalMetricsTest :
 
             result.hit.shouldBeTrue()
             result.firstHitRank shouldBe 1
+            result.firstHitSimilarity shouldBe 0.8
         }
 
         test("chunk certo fora do topK não conta como acerto") {
@@ -105,6 +106,7 @@ class RetrievalMetricsTest :
 
             completo.hit.shouldBeTrue()
             completo.firstHitRank shouldBe 2
+            completo.firstHitSimilarity shouldBe 0.8
             parcial.hit.shouldBeFalse()
         }
 
