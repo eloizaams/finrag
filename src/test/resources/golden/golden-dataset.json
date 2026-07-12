@@ -1,0 +1,206 @@
+{
+  "description": "Golden dataset do M8: perguntas com fonte esperada conhecida sobre o corpus de src/test/resources/golden/corpus/. Perguntas são parafraseadas (nunca frase literal do documento). O acerto de retrieval exige que o chunk retornado pertença ao expectedDocument E contenha a expectedSubstring (comparação com espaços em branco normalizados).",
+  "cases": [
+    {
+      "id": "receita-2025",
+      "question": "Quanto a ACME faturou no exercício de 2025?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["R$ 4,2 bilhões"],
+      "referenceAnswer": "A receita líquida consolidada foi de R$ 4,2 bilhões, crescimento de 18% sobre 2024."
+    },
+    {
+      "id": "segmento-maior-crescimento",
+      "question": "Qual área da empresa mais cresceu no ano e em que ritmo?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["crescimento de 31%"],
+      "referenceAnswer": "O segmento de logística, com crescimento de 31% na receita, o maior entre os segmentos."
+    },
+    {
+      "id": "dividendos-2025",
+      "question": "Que valor os acionistas vão receber referente ao resultado de 2025?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["R$ 320 milhões"],
+      "referenceAnswer": "R$ 320 milhões em dividendos, payout de 35% do lucro líquido ajustado, pagos em duas parcelas em 2026."
+    },
+    {
+      "id": "inadimplencia-acme-pay",
+      "question": "Como está a qualidade da carteira de crédito da fintech da ACME?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["encerrou o ano em 3,4%"],
+      "referenceAnswer": "A inadimplência acima de 90 dias da ACME Pay fechou o ano em 3,4%, abaixo da média de mercado."
+    },
+    {
+      "id": "capex-2026",
+      "question": "Quanto a empresa planeja investir no próximo ano?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["R$ 550 milhões"],
+      "referenceAnswer": "O orçamento de investimentos aprovado para 2026 é de R$ 550 milhões."
+    },
+    {
+      "id": "alavancagem-evolucao",
+      "question": "Como evoluiu o endividamento da companhia em relação à geração de caixa?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["de 2,1x para 1,6x"],
+      "referenceAnswer": "A alavancagem (dívida líquida/EBITDA) caiu de 2,1x para 1,6x, dentro do teto de 2,5x do covenant."
+    },
+    {
+      "id": "hedge-cambial-varejo",
+      "question": "Como a companhia se protege da variação do dólar nas compras do varejo?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["cobertura mínima de 80%"],
+      "referenceAnswer": "Com contratos de hedge cobrindo no mínimo 80% da exposição cambial dos custos importados.",
+      "notes": "Ambíguo de propósito: 'hedge cambial' também aparece na política de investimentos (vedações e ativos no exterior)."
+    },
+    {
+      "id": "meta-frota-eletrica",
+      "question": "Até quando toda a entrega de última milha será feita com veículos elétricos?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["100% elétrica até 2029"],
+      "referenceAnswer": "A meta pública é operar com frota de última milha 100% elétrica até 2029."
+    },
+    {
+      "id": "migracao-microsservicos",
+      "question": "O que envolveu a modernização da plataforma de e-commerce e que resultados ela trouxe?",
+      "hasAnswer": true,
+      "expectedDocument": "relatorio-anual-acme.md",
+      "expectedSubstrings": ["25% à tecnologia", "em setembro de 2025"],
+      "referenceAnswer": "A migração para microsserviços consumiu parte dos 25% do capex destinados à tecnologia, foi concluída em setembro de 2025 e reduziu em 38% o tempo de resposta das páginas de produto.",
+      "notes": "Caso multi-chunk: a resposta completa exige o parágrafo de capex e o de tecnologia."
+    },
+    {
+      "id": "alocacao-alvo",
+      "question": "Como o caixa da tesouraria deve ser distribuído entre as classes de ativos?",
+      "hasAnswer": true,
+      "expectedDocument": "politica-investimentos.md",
+      "expectedSubstrings": ["60% em títulos públicos federais"],
+      "referenceAnswer": "60% em títulos públicos federais, 25% em crédito privado, 10% em multimercado com liquidez diária e 5% em caixa."
+    },
+    {
+      "id": "limite-por-emissor",
+      "question": "Quanto, no máximo, a tesouraria pode aplicar num único emissor de crédito privado?",
+      "hasAnswer": true,
+      "expectedDocument": "politica-investimentos.md",
+      "expectedSubstrings": ["5% do total da carteira"],
+      "referenceAnswer": "No máximo 5% do total da carteira por emissor (e 10% por conglomerado financeiro)."
+    },
+    {
+      "id": "vedacao-cripto",
+      "question": "A tesouraria da ACME pode comprar bitcoin?",
+      "hasAnswer": true,
+      "expectedDocument": "politica-investimentos.md",
+      "expectedSubstrings": ["aplicar em criptoativos"],
+      "referenceAnswer": "Não — a política veda aplicar em criptoativos ou em fundos com exposição a criptoativos.",
+      "notes": "Teste de busca semântica: 'bitcoin' não aparece no corpus, só 'criptoativos'."
+    },
+    {
+      "id": "liquidez-minima",
+      "question": "Que fração dos recursos da tesouraria precisa estar disponível quase de imediato?",
+      "hasAnswer": true,
+      "expectedDocument": "politica-investimentos.md",
+      "expectedSubstrings": ["liquidez em D+1"],
+      "referenceAnswer": "No mínimo 30% da carteira em ativos com liquidez em D+1."
+    },
+    {
+      "id": "rebalanceamento-extraordinario",
+      "question": "Em que situação a carteira precisa ser reequilibrada fora do calendário trimestral?",
+      "hasAnswer": true,
+      "expectedDocument": "politica-investimentos.md",
+      "expectedSubstrings": ["5 pontos percentuais"],
+      "referenceAnswer": "Quando qualquer classe de ativo desviar mais de 5 pontos percentuais da alocação-alvo."
+    },
+    {
+      "id": "medicao-risco-mercado",
+      "question": "Qual metodologia a área de riscos usa para medir o risco de mercado da carteira da tesouraria?",
+      "hasAnswer": true,
+      "expectedDocument": "politica-investimentos.md",
+      "expectedSubstrings": ["intervalo de confiança de 95%"],
+      "referenceAnswer": "VaR diário com horizonte de 21 dias úteis e confiança de 95%, limitado a 1,5% do patrimônio.",
+      "notes": "Ambíguo de propósito: 'risco' aparece nos três documentos com sentidos diferentes."
+    },
+    {
+      "id": "alcada-conselho",
+      "question": "Quem precisa aprovar uma aplicação de 250 milhões de reais da tesouraria?",
+      "hasAnswer": true,
+      "expectedDocument": "politica-investimentos.md",
+      "expectedSubstrings": ["acima de R$ 200 milhões"],
+      "referenceAnswer": "O conselho de administração — aplicações acima de R$ 200 milhões exigem aprovação dele."
+    },
+    {
+      "id": "taxa-administracao",
+      "question": "Quanto o fundo cobra por ano para administrar o dinheiro dos cotistas?",
+      "hasAnswer": true,
+      "expectedDocument": "faq-fundos.md",
+      "expectedSubstrings": ["0,8% ao ano"],
+      "referenceAnswer": "Taxa de administração de 0,8% ao ano sobre o patrimônio líquido, provisionada diariamente."
+    },
+    {
+      "id": "taxa-performance",
+      "question": "Que percentual o fundo fica com o rendimento que passar do CDI?",
+      "hasAnswer": true,
+      "expectedDocument": "faq-fundos.md",
+      "expectedSubstrings": ["performance de 20% sobre o que exceder"],
+      "referenceAnswer": "20% sobre o que exceder 100% do CDI, apurado semestralmente com linha d'água.",
+      "notes": "Ambíguo de propósito: o CDI aparece nos três documentos (custo da dívida, benchmark da tesouraria e performance do fundo)."
+    },
+    {
+      "id": "prazo-resgate",
+      "question": "Depois de pedir o resgate, em quantos dias o dinheiro cai na conta?",
+      "hasAnswer": true,
+      "expectedDocument": "faq-fundos.md",
+      "expectedSubstrings": ["cotização em D+1"],
+      "referenceAnswer": "Cotização em D+1 e pagamento em D+2 após a cotização — até três dias úteis do pedido."
+    },
+    {
+      "id": "menor-aliquota-ir",
+      "question": "Qual é a menor alíquota de imposto de renda possível nesse fundo e o que preciso fazer para alcançá-la?",
+      "hasAnswer": true,
+      "expectedDocument": "faq-fundos.md",
+      "expectedSubstrings": ["15% acima de 720 dias"],
+      "referenceAnswer": "15%, mantendo a aplicação por mais de 720 dias (tabela regressiva de longo prazo)."
+    },
+    {
+      "id": "garantia-fgc",
+      "question": "Se a gestora quebrar, meu investimento no fundo tem alguma garantia tipo a da poupança?",
+      "hasAnswer": true,
+      "expectedDocument": "faq-fundos.md",
+      "expectedSubstrings": ["Fundo Garantidor de Créditos"],
+      "referenceAnswer": "Não há garantia do FGC, mas o patrimônio do fundo é segregado do patrimônio da gestora e pertence aos cotistas."
+    },
+    {
+      "id": "fundo-distribui-rendimentos",
+      "question": "O fundo ACME Renda Fixa Ativa paga proventos periódicos aos investidores?",
+      "hasAnswer": true,
+      "expectedDocument": "faq-fundos.md",
+      "expectedSubstrings": ["incorporado ao valor da cota"],
+      "referenceAnswer": "Não — o resultado é incorporado ao valor da cota e o ganho só é realizado no resgate.",
+      "notes": "Ambíguo de propósito com os dividendos da ACME Participações no relatório anual."
+    },
+    {
+      "id": "sem-resposta-remuneracao-diretoria",
+      "question": "Qual foi a remuneração total da diretoria da ACME em 2025?",
+      "hasAnswer": false,
+      "referenceAnswer": "O corpus não contém informação sobre remuneração da diretoria."
+    },
+    {
+      "id": "sem-resposta-rentabilidade-fundo",
+      "question": "Qual foi a rentabilidade do fundo ACME Renda Fixa Ativa nos últimos 12 meses?",
+      "hasAnswer": false,
+      "referenceAnswer": "O corpus diz onde consultar a rentabilidade histórica, mas não traz o número.",
+      "notes": "Caso difícil: o FAQ fala de rentabilidade sem dar o valor — testa se o threshold segura o chunk 'quase relevante'."
+    },
+    {
+      "id": "sem-resposta-ipo-acao",
+      "question": "Quando a ACME fez seu IPO e quanto vale a ação hoje?",
+      "hasAnswer": false,
+      "referenceAnswer": "O corpus não contém informação sobre IPO nem sobre cotação de ações."
+    }
+  ]
+}

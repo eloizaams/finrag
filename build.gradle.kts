@@ -65,3 +65,26 @@ tasks.withType<Test> {
     environment("OPENAI_API_KEY", "test-only-openai-key-not-real")
     environment("ANTHROPIC_API_KEY", "test-only-anthropic-key-not-real")
 }
+
+// a avaliação de RAG (tag RagEval) usa a API real da OpenAI e fica fora do
+// ciclo padrão de build/CI — roda só via ./gradlew ragEval (specs/M8-design.md)
+tasks.test {
+    systemProperty("kotest.tags", "!RagEval")
+}
+
+tasks.register<Test>("ragEval") {
+    description = "Avalia o retrieval do RAG contra o golden dataset (chama a API real da OpenAI)"
+    group = "verification"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    systemProperty("kotest.tags", "RagEval")
+    outputs.upToDateWhen { false }
+    doFirst {
+        val key = System.getenv("OPENAI_API_KEY")
+        require(!key.isNullOrBlank() && !key.startsWith("test-only")) {
+            "defina a chave real: OPENAI_API_KEY=... ./gradlew ragEval"
+        }
+        // sobrescreve a chave fake herdada do bloco withType<Test> acima
+        environment("OPENAI_API_KEY", key)
+    }
+}
