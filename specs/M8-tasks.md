@@ -56,27 +56,31 @@
 
 ## Calibração
 
-- [ ] Rodar `OPENAI_API_KEY=... ./gradlew ragEval` e revisar o relatório
-- [ ] Escolher `topK`/`minSimilarity` finais: melhor recall nos casos com
-      resposta sem derrubar o acerto dos casos sem resposta — registrar a
-      justificativa
-- [ ] Se os valores mudarem: atualizar `RagProperties`/`application.yaml` e
-      validar que os testes existentes continuam verdes
-- [ ] Estimar e anotar o custo por execução do harness (nº de embeddings ×
-      preço do `text-embedding-3-small`)
+- [x] Rodar `OPENAI_API_KEY=... ./gradlew ragEval` e revisar o relatório
+      (duas rodadas em 2026-07-12; a segunda com scores dos acertos no relatório)
+- [x] Escolher `topK`/`minSimilarity` finais: **mantidos 5 / 0.25** — k=5
+      validado (recall 95% vs 86% em k=3; k=8 não ganha nada); threshold inerte
+      em 0.15–0.45 e sem ponto de corte possível (faixas 0,46–0,76 vs 0,55–0,71
+      se sobrepõem) — recusa delegada ao prompt. Justificativa em
+      `docs/rag-eval.md`
+- [x] Se os valores mudarem: atualizar `RagProperties`/`application.yaml` e
+      validar que os testes existentes continuam verdes (não mudaram — nada a
+      atualizar)
+- [x] Estimar e anotar o custo por execução do harness: ~5,2k tokens ≈
+      US$ 0,0001/rodada (documentado em `docs/rag-eval.md`)
 
 ## Documentação e fechamento do marco
 
-- [ ] `docs/rag-eval.md`: metodologia, tabela final do grid, valores escolhidos
+- [x] `docs/rag-eval.md`: metodologia, tabela final do grid, valores escolhidos
       e justificativa, como rodar o harness
-- [ ] README: seção "Avaliação de RAG" (resumo dos números + link para
+- [x] README: seção "Avaliação de RAG" (resumo dos números + link para
       `docs/rag-eval.md`) e atualizar a tabela de progresso (M8 ✅)
-- [ ] ADR-07 em `specs/00-architecture.md`: estratégia de avaliação (golden
+- [x] ADR-07 em `specs/00-architecture.md`: estratégia de avaliação (golden
       dataset + métricas de retrieval, sem framework pronto — coerente com
       ADR-04) e limites conscientes (dataset pequeno, sem LLM-as-judge)
-- [ ] Decidir e registrar: LLM-as-judge entra como extensão ou vai para o
-      backlog M9?
-- [ ] Marcar progresso em `00-architecture.md`/`01-roadmap.md`
+- [x] Decidir e registrar: LLM-as-judge vai para o **backlog M9** (custo e
+      não-determinismo; registrado no roadmap e no ADR-07)
+- [x] Marcar progresso em `00-architecture.md`/`01-roadmap.md`
 - [ ] Commits semânticos ao longo do marco; `./gradlew build` limpo antes do PR
 - [ ] PR `feature/m8-avaliacao-rag → develop`; release `develop → main` ao
       final (o harness não roda no CI — nada muda no deploy)

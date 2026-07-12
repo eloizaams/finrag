@@ -24,8 +24,8 @@ mais relevantes do(s) documento(s), com custo mínimo de operação.
 | M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
 | M6 | Docs da API + hardening | ✅ Concluído |
 | M7 | Deploy (Render + Neon, URL pública) | ✅ Concluído |
-| M8 | Avaliação de RAG (golden dataset, calibração de retrieval) | 🔄 Em andamento |
-| M9 | Backlog opcional (multi-tenancy, re-ranking, SSE, async) | 💤 Backlog |
+| M8 | Avaliação de RAG (golden dataset, calibração de retrieval) | ✅ Concluído |
+| M9 | Backlog opcional (multi-tenancy, re-ranking, SSE, async, LLM-as-judge) | 💤 Backlog |
 
 Roadmap com motivação de cada marco futuro e ordem de prioridade em
 `specs/01-roadmap.md`. Detalhe de cada marco já iniciado (critérios de
@@ -114,6 +114,7 @@ tocar no core.
 | ADR-04 | Pipeline RAG implementado manualmente (sem Spring AI/LangChain4j) | Spring AI | Projeto pequeno o suficiente para implementar na mão; maximiza aprendizado e capacidade de defender cada etapa em entrevista |
 | ADR-05 | Ingestão síncrona no MVP | Fila assíncrona (Kafka/SQS) desde o início | Reduz complexidade inicial; evolução para assíncrono fica como marco opcional (M9), demonstrando visão de escalabilidade |
 | ADR-06 | Clean Architecture com 4 camadas | Arquitetura em camadas tradicional (controller-service-repository) | Isola regras de negócio de frameworks e provedores externos; facilita testes unitários sem Testcontainers |
+| ADR-07 | Avaliação de RAG com golden dataset próprio, só de retrieval | Frameworks prontos (Ragas, promptfoo); LLM-as-judge da resposta gerada | Retrieval é determinístico, barato (~US$ 0,0001/rodada) e é o teto da qualidade — a resposta nunca é melhor que o contexto que chega ao prompt. Dataset pequeno (25 casos) implementado na mão, coerente com ADR-04; achado central: nenhum threshold de similaridade separa "tem resposta" de "não tem" (faixas 0,46–0,76 vs 0,55–0,71 se sobrepõem), então a recusa pertence ao prompt do LLM. LLM-as-judge ficou no backlog (M9) por custo e não-determinismo. Resultados em `docs/rag-eval.md` |
 
 ## Restrições do projeto
 
@@ -128,7 +129,9 @@ tocar no core.
 - Re-ranking de resultados de busca
 - Streaming de resposta (SSE) — candidato a M9
 - Suporte a outros formatos além de PDF/Markdown
-- Avaliação automatizada de qualidade de RAG (golden dataset) — candidato a M9
+- Avaliação da resposta gerada (LLM-as-judge) — a avaliação de *retrieval* foi
+  entregue no M8 (golden dataset + `./gradlew ragEval`, ver ADR-07); julgar a
+  qualidade da resposta do LLM segue como candidato a M9
 
 ## Glossário rápido
 

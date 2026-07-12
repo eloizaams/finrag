@@ -25,7 +25,7 @@ O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 | M5 | Gestão de documentos (GET/DELETE, paginação) | ✅ Concluído |
 | M6 | Docs da API + hardening | ✅ Concluído |
 | M7 | Deploy (Render + Neon, URL pública) | ✅ Concluído |
-| M8 | Avaliação de RAG (golden dataset, calibração de retrieval) | 🔄 Em andamento |
+| M8 | Avaliação de RAG (golden dataset, calibração de retrieval) | ✅ Concluído |
 
 Roadmap completo (motivação e ordem de cada marco futuro) em
 [`specs/01-roadmap.md`](specs/01-roadmap.md).
@@ -210,6 +210,29 @@ Erros mapeados para `ProblemDetail`:
 | Limite de perguntas por minuto excedido          | `429`  |
 | Sem token / token inválido                      | `401`  |
 
+## Avaliação de RAG
+
+Como saber se a busca retorna os chunks certos? O retrieval é medido contra um
+**golden dataset** (25 perguntas com fonte esperada conhecida, sobre um corpus
+fictício versionado) por um harness que roda fora do build/CI:
+
+```bash
+OPENAI_API_KEY=sk-... ./gradlew ragEval   # ~US$ 0,0001 por rodada
+```
+
+Resultados da calibração (grid `topK × minSimilarity` computado em memória com
+uma única rodada de embeddings):
+
+- **recall@5 = 95%** e **MRR = 0,75** na configuração de produção
+  (`topK=5`, `minSimilarity=0.25`) — `k=5` validado pelos dados: `k=3` perde
+  9 p.p. de recall e `k=8` não ganha nada.
+- **Nenhum threshold separa** "tem resposta" de "não tem": a similaridade dos
+  acertos (0,46–0,76) se sobrepõe à dos chunks irrelevantes (0,55–0,71). A
+  recusa é responsabilidade do prompt do RAG, não do threshold — medido, não
+  suposto.
+
+Metodologia completa, achados e limitações em [`docs/rag-eval.md`](docs/rag-eval.md).
+
 ## Observabilidade
 
 Logs em formato estruturado JSON (ECS — `logging.structured.format.console: ecs`).
@@ -259,6 +282,7 @@ Limitações conscientes do free tier (custo mensal zero):
 
 - Build + testes: `./gradlew build`
 - Só testes: `./gradlew test` (usa Testcontainers — requer Docker rodando)
+- Avaliação de retrieval do RAG: `OPENAI_API_KEY=... ./gradlew ragEval` (API real da OpenAI)
 - Health check: `GET /actuator/health`
 - Métricas: `GET /actuator/prometheus`
 - Collection do Postman com todos os endpoints: `postman/FinRAG.postman_collection.json`
