@@ -13,6 +13,32 @@ Arquitetura completa, diagrama e ADRs em [`specs/00-architecture.md`](specs/00-a
 O desenvolvimento segue spec-driven development: cada marco tem seus próprios
 `requirements.md`/`design.md`/`tasks.md` em [`specs/`](specs/).
 
+## Destaques para recrutadores
+
+Em 30 segundos, o que este projeto demonstra:
+
+- **Pipeline RAG implementado à mão** (sem Spring AI/LangChain4j): extração de
+  texto, chunking, embeddings, busca vetorial e prompt são código próprio —
+  cada etapa tem decisão registrada em ADR e defensável em entrevista.
+- **Qualidade medida, não suposta**: golden dataset de 25 casos e harness de
+  avaliação (`./gradlew ragEval`, ~US$ 0,0001/rodada) → **recall@5 = 95%** e
+  **MRR = 0,75**; `topK=5` e `minSimilarity=0.25` escolhidos por grid de
+  calibração, não por chute ([`docs/rag-eval.md`](docs/rag-eval.md)).
+- **Achado de engenharia real**: nenhum threshold de similaridade separa "tem
+  resposta" de "não tem" (acertos em 0,46–0,76 vs chunks irrelevantes em
+  0,55–0,71) — por isso a recusa é responsabilidade do prompt do LLM, uma
+  decisão tomada com dados.
+- **Em produção com custo mensal zero**: Render + Neon (free tier), deploy
+  contínuo (merge na `main` → CI verde → publish com health check), URL
+  pública testável via Swagger.
+- **Engenharia de backend completa**: Clean Architecture, JWT, rate limiting
+  por usuário, migrations Flyway, testes de integração com Testcontainers
+  (Postgres + pgvector reais, sem mock de banco) e observabilidade (logs
+  JSON/ECS + métricas Prometheus por etapa do pipeline).
+
+Quer ver funcionando? Roteiro de demo de 5 minutos em [`docs/demo.md`](docs/demo.md).
+Quer questionar as escolhas? Defesa de cada ADR em [`docs/adr-defesa.md`](docs/adr-defesa.md).
+
 ## Progresso
 
 | Marco | Descrição | Status |
@@ -286,3 +312,4 @@ Limitações conscientes do free tier (custo mensal zero):
 - Health check: `GET /actuator/health`
 - Métricas: `GET /actuator/prometheus`
 - Collection do Postman com todos os endpoints: `postman/FinRAG.postman_collection.json`
+- Roteiro de demo de 5 minutos (com documentos e perguntas prontos): [`docs/demo.md`](docs/demo.md)
