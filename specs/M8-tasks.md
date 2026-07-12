@@ -81,9 +81,10 @@
 - [x] Decidir e registrar: LLM-as-judge vai para o **backlog M9** (custo e
       não-determinismo; registrado no roadmap e no ADR-07)
 - [x] Marcar progresso em `00-architecture.md`/`01-roadmap.md`
-- [ ] Commits semânticos ao longo do marco; `./gradlew build` limpo antes do PR
-- [ ] PR `feature/m8-avaliacao-rag → develop`; release `develop → main` ao
-      final (o harness não roda no CI — nada muda no deploy)
+- [x] Commits semânticos ao longo do marco; `./gradlew build` limpo antes do PR
+- [ ] PR `feature/m8-avaliacao-rag → develop` (**#19, aberto**); release
+      `develop → main` ao final (o harness não roda no CI — nada muda no
+      deploy)
 
 ## Definição de pronto (Definition of Done)
 
