@@ -1,5 +1,11 @@
 # FinRAG
 
+[![CI](https://github.com/eloizaams/finrag/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/eloizaams/finrag/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Coverage](https://img.shields.io/badge/coverage-97.6%25-brightgreen)](docs/rag-eval.md)
+
+🇧🇷 Português (este arquivo) · [🇺🇸 English](README.en.md)
+
 API REST em Kotlin + Spring Boot com um pipeline RAG (Retrieval-Augmented Generation)
 sobre documentos financeiros. Projeto de portfólio para demonstrar backend Kotlin
 aplicado a IA.
@@ -308,8 +314,15 @@ Limitações conscientes do free tier (custo mensal zero):
 
 - Build + testes: `./gradlew build`
 - Só testes: `./gradlew test` (usa Testcontainers — requer Docker rodando)
+- Cobertura de testes (Kover): `./gradlew koverHtmlReport` → relatório em
+  `build/reports/kover/html/index.html` (97,6% de cobertura de linha na última
+  medição; `ragEval` fica fora por chamar a API real da OpenAI)
 - Avaliação de retrieval do RAG: `OPENAI_API_KEY=... ./gradlew ragEval` (API real da OpenAI)
 - Health check: `GET /actuator/health`
 - Métricas: `GET /actuator/prometheus`
 - Collection do Postman com todos os endpoints: `postman/FinRAG.postman_collection.json`
 - Roteiro de demo de 5 minutos (com documentos e perguntas prontos): [`docs/demo.md`](docs/demo.md)
+
+## Licença
+
+[MIT](LICENSE)
