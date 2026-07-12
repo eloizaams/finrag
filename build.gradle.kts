@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
+    id("org.jetbrains.kotlinx.kover") version "0.9.8"
 }
 
 group = "com.eloiza"
@@ -56,6 +57,15 @@ dependencies {
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+    }
+}
+
+kover {
+    currentProject {
+        instrumentation {
+            // ragEval chama a API real da OpenAI e fica fora do escopo de cobertura (specs/M8-design.md)
+            disabledForTestTasks.add("ragEval")
+        }
     }
 }
 
